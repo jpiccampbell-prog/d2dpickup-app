@@ -137,10 +137,18 @@
     // Helper function to get next 30 days
     function getNext30Days() {
       const days = [];
+      const today = new Date();
+      // Set to start of today (midnight) in local timezone
+      today.setHours(0, 0, 0, 0);
+      
       for (let i = 0; i < 30; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        days.push(date.toISOString().split('T')[0]);
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        // Use local date instead of UTC to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        days.push(`${year}-${month}-${day}`);
       }
       return days;
     }
@@ -347,7 +355,10 @@
         });
 
         console.log('Creating date elements...');
-        next30Days.forEach(date => {
+        next30Days.forEach((date, index) => {
+          if (index < 5) {  // Only log first 5 dates to avoid spam
+            console.log(`Calendar date ${index}:`, date);
+          }
           const dateAvail = availability[date];
           const isAvailable = dateAvail?.available || false;
           const capacity = dateAvail?.capacity || 0;
@@ -511,7 +522,7 @@
                 Mark as Completed
               </button>
             ` : ''}
-            ${request.status === 'completed' ? `
+            ${request.status === 'completed' || request.status === 'cancelled' ? `
               <button 
                 onclick="deletePickup('${doc.id}')"
                 class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm"
@@ -1239,8 +1250,8 @@
 
         alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date).toLocaleDateString()}\nBoxes: ${boxes}`);
         
-        // Refresh the available dates to show updated capacity
-        await loadDriverAvailableDates(driverId);
+        // Refresh saved drivers to show updated capacity
+        await loadSavedDrivers();
       } catch (error) {
         console.error('Error scheduling pickup:', error);
         alert('Error scheduling pickup: ' + error.message);
@@ -1343,7 +1354,8 @@
           console.log('Pickup:', {
             date: pickupDateValue,
             status: pickup.status,
-            customer: pickup.customerName
+            customer: pickup.customerName,
+            manualEntry: pickup.manualEntry || false
           });
           
           // Compare dates as strings (format: YYYY-MM-DD)
@@ -1353,6 +1365,15 @@
               address: pickup.customerAddress,
               customerName: pickup.customerName,
               customerPhone: pickup.customerPhone
+            });
+          } else {
+            // Debug why it didn't match
+            console.log('  → Skipped because:', {
+              dateMatch: pickupDateValue === dateInput,
+              pickupDate: pickupDateValue,
+              selectedDate: dateInput,
+              statusMatch: pickup.status === 'confirmed',
+              actualStatus: pickup.status
             });
           }
         });
@@ -1560,6 +1581,10 @@
       const remainingCapacity = parseInt(document.getElementById('manualPickupCapacity').value);
       const boxes = parseInt(document.getElementById('manualCustomerBoxes').value);
 
+      console.log('=== MANUAL PICKUP DEBUG ===');
+      console.log('Date from hidden field:', date);
+      console.log('Date type:', typeof date);
+
       // Validate capacity
       if (boxes > remainingCapacity) {
         alert(`Only ${remainingCapacity} boxes available on this date. Please reduce the number of boxes or choose a different date.`);
@@ -1568,8 +1593,8 @@
 
       const customerData = {
         customerId: 'manual-' + Date.now(), // Manual entry doesn't have user ID
-        customerName: document.getElementById('manualCustomerName').value,
-        customerEmail: document.getElementById('manualCustomerEmail').value,
+        customerName: document.getElementById('manualCustomerName').value.trim() || 'Unknown',
+        customerEmail: document.getElementById('manualCustomerEmail').value.trim() || 'Unknown',
         customerPhone: document.getElementById('manualCustomerPhone').value,
         customerAddress: `${document.getElementById('manualCustomerStreet').value}, ${document.getElementById('manualCustomerCity').value}, ${document.getElementById('manualCustomerState').value} ${document.getElementById('manualCustomerZip').value}`,
         driverId: window.currentUser.driverId,
@@ -1580,6 +1605,9 @@
         createdAt: new Date().toISOString(),
         manualEntry: true // Flag to identify phone-in customers
       };
+
+      console.log('Saving pickup with date:', customerData.pickupDate);
+      console.log('Full customer data:', customerData);
 
       try {
         await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), customerData);
@@ -2138,8 +2166,8 @@
         <input type="hidden" id="manualPickupCapacity" />
 
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Customer Name *</label>
-          <input type="text" id="manualCustomerName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="John Doe">
+          <label class="block text-gray-700 font-medium mb-2">Customer Name (Optional)</label>
+          <input type="text" id="manualCustomerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided">
         </div>
 
         <div>
@@ -2148,8 +2176,8 @@
         </div>
 
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Email Address *</label>
-          <input type="email" id="manualCustomerEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="customer@email.com">
+          <label class="block text-gray-700 font-medium mb-2">Email Address (Optional)</label>
+          <input type="email" id="manualCustomerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided">
         </div>
 
         <div>

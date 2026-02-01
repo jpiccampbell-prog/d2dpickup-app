@@ -137,14 +137,15 @@
     // Helper function to get next 30 days
     function getNext30Days() {
       const days = [];
-      const today = new Date();
-      // Set to start of today (midnight) in local timezone
-      today.setHours(0, 0, 0, 0);
+      // Get today's date components explicitly in local timezone
+      const now = new Date();
+      const todayYear = now.getFullYear();
+      const todayMonth = now.getMonth();
+      const todayDay = now.getDate();
       
       for (let i = 0; i < 30; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        // Use local date instead of UTC to avoid timezone issues
+        // Create date explicitly using local year/month/day
+        const date = new Date(todayYear, todayMonth, todayDay + i);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');

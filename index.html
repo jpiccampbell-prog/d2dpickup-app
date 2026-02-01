@@ -139,9 +139,15 @@
       const days = [];
       // Get today's date components explicitly in local timezone
       const now = new Date();
+      console.log('=== DATE GENERATION DEBUG ===');
+      console.log('Current time:', now);
+      console.log('Current date string:', now.toLocaleDateString());
+      
       const todayYear = now.getFullYear();
       const todayMonth = now.getMonth();
       const todayDay = now.getDate();
+      
+      console.log('Today components:', { year: todayYear, month: todayMonth, day: todayDay });
       
       for (let i = 0; i < 30; i++) {
         // Create date explicitly using local year/month/day
@@ -149,8 +155,17 @@
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        days.push(`${year}-${month}-${day}`);
+        const dateString = `${year}-${month}-${day}`;
+        
+        if (i === 0) {
+          console.log('First date generated:', dateString);
+          console.log('First date object:', date);
+        }
+        
+        days.push(dateString);
       }
+      
+      console.log('All dates:', days);
       return days;
     }
 

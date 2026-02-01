@@ -392,7 +392,7 @@
             <div class="flex justify-between items-center gap-2">
               <div class="flex-1 cursor-pointer hover:opacity-80" onclick="window.toggleAvailability('${date}', ${!isAvailable})">
                 <span class="font-medium text-gray-700">
-                  ${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  ${new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>
                 ${isAvailable ? `
                   <div class="text-xs text-gray-600 mt-1">

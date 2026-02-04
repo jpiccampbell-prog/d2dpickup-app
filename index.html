@@ -213,8 +213,10 @@
           return;
         }
 
-        // Create user data
+        // Create user data with verification token
         const driverId = accountType === 'driver' ? generateDriverId() : null;
+        const verificationToken = 'verify-' + Math.random().toString(36).substr(2, 16) + Date.now();
+        
         const userData = {
           accountType,
           name,
@@ -227,13 +229,41 @@
           zipCode,
           driverId,
           companyName: accountType === 'driver' ? companyName : null,
+          emailVerified: false,
+          verificationToken: verificationToken,
           createdAt: new Date().toISOString()
         };
 
         // Save to Firestore
-        await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'users'), userData);
+        const docRef = await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'users'), userData);
 
-        alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}Email: ${email}\nPassword: ${password}\n\nYou can now login!`);
+        // Send verification email
+        try {
+          const verificationLink = `${window.location.origin}/?verify=${verificationToken}`;
+          
+          console.log('Sending verification email to:', email);
+          console.log('Verification link:', verificationLink);
+          console.log('EmailJS service ID: service_t39dssm');
+          console.log('EmailJS template ID: template_verify');
+          
+          const emailResponse = await emailjs.send(
+            'service_t39dssm',
+            'template_verify',
+            {
+              to_email: email,
+              user_name: name,
+              verification_link: verificationLink
+            }
+          );
+          
+          console.log('Email sent successfully!', emailResponse);
+
+          alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}A verification email has been sent to:\n${email}\n\nPlease check your email and click the verification link to activate your account.`);
+        } catch (emailError) {
+          console.error('Error sending verification email:', emailError);
+          console.error('Error details:', emailError.text, emailError.status);
+          alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}Email: ${email}\nPassword: ${password}\n\n⚠️ Verification email failed to send.\n\nError: ${emailError.text || emailError.message}\n\nYou can still try to login, but your account needs verification. Contact support at jpiccampbell@yahoo.com`);
+        }
 
         // Reset form
         document.getElementById('createAccountForm').reset();
@@ -281,6 +311,13 @@
         });
 
         console.log('Login successful, user:', window.currentUser);
+        
+        // Check if email is verified
+        if (!window.currentUser.emailVerified) {
+          alert(`⚠️ Email Not Verified\n\nPlease check your email (${window.currentUser.email}) and click the verification link to activate your account.\n\nDidn't receive the email? Contact support at jpiccampbell@yahoo.com`);
+          window.currentUser = null;
+          return;
+        }
         
         alert(`Welcome ${window.currentUser.name}!`);
         
@@ -1697,10 +1734,52 @@
       });
     };
 
+    // CHECK FOR EMAIL VERIFICATION TOKEN
+    async function checkEmailVerification() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const verifyToken = urlParams.get('verify');
+      
+      if (verifyToken) {
+        try {
+          // Find user with this verification token
+          const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
+          const q = window.firestoreQuery(usersRef, window.firestoreWhere('verificationToken', '==', verifyToken));
+          const querySnapshot = await window.firestoreGetDocs(q);
+          
+          if (querySnapshot.empty) {
+            alert('❌ Invalid verification link\n\nThis link is invalid or has already been used.\n\nIf you need help, contact support at jpiccampbell@yahoo.com');
+            window.history.replaceState({}, document.title, '/'); // Remove ?verify= from URL
+            return;
+          }
+          
+          // Update user to verified
+          querySnapshot.forEach(async (doc) => {
+            await window.firestoreUpdateDoc(
+              window.firestoreDoc(window.firestoreDb, 'users', doc.id),
+              { 
+                emailVerified: true,
+                verificationToken: null // Remove token after use
+              }
+            );
+            
+            const userData = doc.data();
+            alert(`✅ EMAIL VERIFIED!\n\nYour account (${userData.email}) has been verified!\n\nYou can now login as a ${userData.accountType}.`);
+            window.history.replaceState({}, document.title, '/'); // Remove ?verify= from URL
+          });
+        } catch (error) {
+          console.error('Error verifying email:', error);
+          alert('Error verifying email. Please try again or contact support.');
+        }
+      }
+    }
+
     // Initialize on page load
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       window.showView('home');
       console.log('App initialized with Firebase!');
+      
+      // Check for email verification
+      await checkEmailVerification();
     });
   </script>
 </head>

@@ -243,11 +243,11 @@
           
           console.log('Sending verification email to:', email);
           console.log('Verification link:', verificationLink);
-          console.log('EmailJS service ID: service_t39dssm');
+          console.log('EmailJS service ID: service_lvi2gmn');
           console.log('EmailJS template ID: template_verify');
           
           const emailResponse = await emailjs.send(
-            'service_t39dssm',
+            'service_lvi2gmn',
             'template_verify',
             {
               to_email: email,
@@ -690,7 +690,7 @@
         console.log('Template params:', templateParams);
         
         await emailjs.send(
-          'service_t39dssm',  // Your service ID
+          'service_lvi2gmn',  // Gmail service ID
           'template_kp2xdis', // Your template ID
           templateParams
         );

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D2D Pickup - Simple Delivery Management for Independent Drivers</title>
+  <meta name="description" content="Professional delivery scheduling and route planning software for independent drivers and small courier businesses. 10x cheaper than enterprise solutions.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .feature-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <span class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            📦 D2D Pickup
+          </span>
+        </div>
+        <div class="hidden md:flex space-x-8">
+          <a href="#features" class="text-gray-700 hover:text-indigo-600 transition">Features</a>
+          <a href="#how-it-works" class="text-gray-700 hover:text-indigo-600 transition">How It Works</a>
+          <a href="#pricing" class="text-gray-700 hover:text-indigo-600 transition">Pricing</a>
+          <a href="#contact" class="text-gray-700 hover:text-indigo-600 transition">Contact</a>
+        </div>
+        <div>
+          <a href="/index.html" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition">
+            Launch App
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="gradient-bg text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+          Delivery Management<br/>
+          <span class="text-yellow-300">Made Simple</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 text-indigo-100 max-w-3xl mx-auto">
+          Professional scheduling and route planning software for independent drivers and small courier businesses. 
+          <span class="font-semibold text-yellow-300">10x cheaper</span> than enterprise solutions.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a href="/index.html" class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition shadow-lg">
+            Get Started Free →
+          </a>
+          <a href="#how-it-works" class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-indigo-800 transition">
+            See How It Works
+          </a>
+        </div>
+        <p class="mt-6 text-indigo-200 text-sm">
+          ✓ No credit card required  ✓ Free forever for basic features  ✓ 2-minute setup
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="bg-white py-12 border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-4xl font-bold text-indigo-600">$15/mo</div>
+          <div class="text-gray-600 mt-2">vs $150+ competitors</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-indigo-600">2 min</div>
+          <div class="text-gray-600 mt-2">Setup time</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-indigo-600">100%</div>
+          <div class="text-gray-600 mt-2">Web-based (no install)</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold text-indigo-600">∞</div>
+          <div class="text-gray-600 mt-2">Unlimited customers</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Everything You Need</h2>
+        <p class="text-xl text-gray-600">Professional features without the enterprise price tag</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">📅</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Smart Scheduling</h3>
+          <p class="text-gray-600">Set your availability and capacity. Customers book directly - no back-and-forth emails or calls.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">🗺️</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">GPS Route Planning</h3>
+          <p class="text-gray-600">Automatic route optimization from your location. Turn-by-turn directions with Google Maps integration.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">👥</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Customer Portal</h3>
+          <p class="text-gray-600">Customers can see your availability, book pickups, and track their requests in real-time.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">📧</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Email Notifications</h3>
+          <p class="text-gray-600">Automatic alerts when you complete a stop - the next customer knows you're on your way.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">📱</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Mobile-Friendly</h3>
+          <p class="text-gray-600">Works perfectly on phones, tablets, and computers. Access from anywhere, anytime.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="bg-white rounded-xl p-8 shadow-md feature-card">
+          <div class="text-4xl mb-4">📦</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Capacity Management</h3>
+          <p class="text-gray-600">Set box limits per day. Automatic booking cutoff when you're full. Never overbook again.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+        <p class="text-xl text-gray-600">Get started in 3 simple steps</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- For Drivers -->
+        <div>
+          <h3 class="text-2xl font-bold text-indigo-600 mb-6">🚚 For Drivers</h3>
+          <div class="space-y-6">
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
+                1
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Create Your Account</h4>
+                <p class="text-gray-600">Sign up in 2 minutes. Get your unique driver code to share with customers.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
+                2
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Set Your Availability</h4>
+                <p class="text-gray-600">Mark which days you're available and how many boxes you can handle. Update anytime.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">
+                3
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Accept & Deliver</h4>
+                <p class="text-gray-600">Confirm pickup requests, create optimized routes, and complete deliveries. Simple!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- For Customers -->
+        <div>
+          <h3 class="text-2xl font-bold text-green-600 mb-6">📦 For Customers</h3>
+          <div class="space-y-6">
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">
+                1
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Find Your Driver</h4>
+                <p class="text-gray-600">Get your driver's unique code and add them to your account. One-time setup.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">
+                2
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Book Your Pickup</h4>
+                <p class="text-gray-600">See available dates, choose one, enter number of boxes, and add any special notes.</p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold">
+                3
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 mb-1">Get Notifications</h4>
+                <p class="text-gray-600">Receive email alerts when your driver is on the way. Track your pickup status.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Simple, Honest Pricing</h2>
+        <p class="text-xl text-gray-600">No hidden fees. Cancel anytime.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <!-- Free Plan -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-gray-200">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+          <div class="text-4xl font-bold text-gray-900 mb-6">$0<span class="text-lg text-gray-600">/month</span></div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Basic scheduling</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Route planning</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Email notifications</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Unlimited customers</span>
+            </li>
+          </ul>
+          <a href="/index.html" class="block text-center bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition">
+            Get Started
+          </a>
+        </div>
+
+        <!-- Pro Plan (Coming Soon) -->
+        <div class="bg-white rounded-xl shadow-2xl p-8 border-2 border-indigo-600 relative">
+          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+            Coming Soon
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
+          <div class="text-4xl font-bold text-gray-900 mb-6">$15<span class="text-lg text-gray-600">/month</span></div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Everything in Free</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">SMS notifications</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Priority support</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Analytics dashboard</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Custom branding</span>
+            </li>
+          </ul>
+          <button disabled class="block w-full text-center bg-gray-300 text-gray-500 px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
+            Coming Q2 2026
+          </button>
+        </div>
+
+        <!-- Enterprise Plan (Coming Soon) -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-2 border-gray-200">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+          <div class="text-4xl font-bold text-gray-900 mb-6">Custom</div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Everything in Pro</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">White-label option</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">API access</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Dedicated support</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold">✓</span>
+              <span class="text-gray-600">Custom integrations</span>
+            </li>
+          </ul>
+          <a href="#contact" class="block text-center bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition">
+            Contact Us
+          </a>
+        </div>
+      </div>
+
+      <p class="text-center text-gray-600 mt-8">
+        💡 All plans include unlimited customers and pickups
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="gradient-bg text-white py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl font-bold mb-6">Ready to Simplify Your Deliveries?</h2>
+      <p class="text-xl mb-8 text-indigo-100">Join independent drivers who've simplified their scheduling and routing</p>
+      <a href="/index.html" class="inline-block bg-white text-indigo-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition shadow-lg">
+        Get Started Free - No Credit Card Required →
+      </a>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-4xl font-bold text-gray-900 mb-6">Questions? We're Here to Help</h2>
+      <p class="text-xl text-gray-600 mb-8">
+        Get in touch with our team for support, partnership opportunities, or just to say hi!
+      </p>
+      <div class="bg-gray-50 rounded-xl p-8">
+        <div class="space-y-4">
+          <div>
+            <span class="font-semibold text-gray-900">Email:</span>
+            <a href="mailto:jpiccampbell@yahoo.com" class="text-indigo-600 hover:text-indigo-800 ml-2">jpiccampbell@yahoo.com</a>
+          </div>
+          <div>
+            <span class="font-semibold text-gray-900">Website:</span>
+            <a href="https://www.d2dpickup.com" class="text-indigo-600 hover:text-indigo-800 ml-2">www.d2dpickup.com</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-300 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h3 class="text-white font-bold text-lg mb-4">D2D Pickup</h3>
+          <p class="text-sm">Simple delivery management for independent drivers and small businesses.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#features" class="hover:text-white transition">Features</a></li>
+            <li><a href="#pricing" class="hover:text-white transition">Pricing</a></li>
+            <li><a href="/index.html" class="hover:text-white transition">Launch App</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#contact" class="hover:text-white transition">Contact</a></li>
+            <li><a href="/privacy-policy.html" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="/terms-of-service.html" class="hover:text-white transition">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Resources</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
+            <li><a href="mailto:jpiccampbell@yahoo.com" class="hover:text-white transition">Support</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-8 text-center text-sm">
+        <p>© 2026 D2D Pickup. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

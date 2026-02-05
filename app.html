@@ -249,7 +249,7 @@
 
         // Send verification email
         try {
-          const verificationLink = `${window.location.origin}/?verify=${verificationToken}`;
+          const verificationLink = `${window.location.origin}/app.html?verify=${verificationToken}`;
           
           console.log('Sending verification email to:', email);
           console.log('Verification link:', verificationLink);

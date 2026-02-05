@@ -1749,21 +1749,34 @@
       const urlParams = new URLSearchParams(window.location.search);
       const verifyToken = urlParams.get('verify');
       
+      console.log('=== EMAIL VERIFICATION CHECK ===');
+      console.log('URL params:', window.location.search);
+      console.log('Verify token:', verifyToken);
+      
       if (verifyToken) {
         try {
+          console.log('Looking for user with token:', verifyToken);
+          
           // Find user with this verification token
           const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
           const q = window.firestoreQuery(usersRef, window.firestoreWhere('verificationToken', '==', verifyToken));
           const querySnapshot = await window.firestoreGetDocs(q);
           
+          console.log('Query complete. Empty?', querySnapshot.empty);
+          console.log('Number of results:', querySnapshot.size);
+          
           if (querySnapshot.empty) {
             alert('❌ Invalid verification link\n\nThis link is invalid or has already been used.\n\nIf you need help, contact support at jpiccampbell@yahoo.com');
-            window.history.replaceState({}, document.title, '/'); // Remove ?verify= from URL
+            window.history.replaceState({}, document.title, '/app.html'); // Remove ?verify= from URL
             return;
           }
           
           // Update user to verified
-          querySnapshot.forEach(async (doc) => {
+          let updated = false;
+          for (const doc of querySnapshot.docs) {
+            console.log('Found user:', doc.id);
+            console.log('Current data:', doc.data());
+            
             await window.firestoreUpdateDoc(
               window.firestoreDoc(window.firestoreDb, 'users', doc.id),
               { 
@@ -1772,14 +1785,24 @@
               }
             );
             
+            console.log('User updated to verified!');
+            
             const userData = doc.data();
             alert(`✅ EMAIL VERIFIED!\n\nYour account (${userData.email}) has been verified!\n\nYou can now login as a ${userData.accountType}.`);
-            window.history.replaceState({}, document.title, '/'); // Remove ?verify= from URL
-          });
+            window.history.replaceState({}, document.title, '/app.html'); // Remove ?verify= from URL
+            updated = true;
+          }
+          
+          if (!updated) {
+            console.error('No user was updated!');
+          }
         } catch (error) {
           console.error('Error verifying email:', error);
-          alert('Error verifying email. Please try again or contact support.');
+          console.error('Error details:', error.message);
+          alert('Error verifying email: ' + error.message + '\n\nPlease contact support.');
         }
+      } else {
+        console.log('No verification token in URL');
       }
     }
 

@@ -262,7 +262,9 @@
             {
               to_email: email,
               user_name: name,
-              verification_link: verificationLink
+              subject: 'Verify your D2D Pickup account',
+              message: 'Welcome to D2D Pickup! Please verify your email address to activate your account.',
+              link: verificationLink
             }
           );
           
@@ -1748,6 +1750,150 @@
       }
     };
 
+    // SHOW FORGOT PASSWORD FORM
+    window.showForgotPassword = function(userType) {
+      window.currentResetUserType = userType;
+      window.showView('passwordReset');
+    };
+
+    // SEND PASSWORD RESET EMAIL
+    window.sendPasswordResetEmail = async function() {
+      const email = document.getElementById('resetEmail').value.trim();
+      
+      if (!email) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      try {
+        // Check if user exists
+        const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
+        const q = window.firestoreQuery(usersRef, window.firestoreWhere('email', '==', email));
+        const querySnapshot = await window.firestoreGetDocs(q);
+        
+        if (querySnapshot.empty) {
+          alert('No account found with this email address.');
+          return;
+        }
+
+        // Generate reset token
+        const resetToken = 'reset-' + Math.random().toString(36).substr(2, 16) + Date.now();
+        
+        // Update user with reset token
+        let userId = null;
+        let userName = null;
+        querySnapshot.forEach(async (doc) => {
+          userId = doc.id;
+          userName = doc.data().name;
+          window.firestoreUpdateDoc(
+            window.firestoreDoc(window.firestoreDb, 'users', doc.id),
+            { resetToken: resetToken }
+          );
+        });
+
+        // Send reset email
+        const resetLink = `${window.location.origin}/app.html?reset=${resetToken}`;
+        
+        await emailjs.send(
+          'service_itfrzub',
+          'template_verify',
+          {
+            to_email: email,
+            user_name: userName,
+            subject: 'Reset your D2D Pickup password',
+            message: 'We received a request to reset your password. Click the link below to create a new password:',
+            link: resetLink
+          }
+        );
+
+        alert('✅ Password reset email sent!\n\nCheck your email for the reset link.');
+        document.getElementById('resetEmail').value = '';
+        window.showView('home');
+      } catch (error) {
+        console.error('Error sending reset email:', error);
+        alert('Error sending reset email. Please try again or contact support.');
+      }
+    };
+
+    // CHECK FOR PASSWORD RESET TOKEN
+    async function checkPasswordReset() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const resetToken = urlParams.get('reset');
+      
+      if (resetToken) {
+        try {
+          // Find user with this reset token
+          const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
+          const q = window.firestoreQuery(usersRef, window.firestoreWhere('resetToken', '==', resetToken));
+          const querySnapshot = await window.firestoreGetDocs(q);
+          
+          if (querySnapshot.empty) {
+            alert('❌ Invalid or expired reset link\n\nThis link is invalid or has already been used.\n\nPlease request a new password reset.');
+            window.history.replaceState({}, document.title, '/app.html');
+            window.showView('home');
+            return;
+          }
+          
+          // Store reset token and user ID for later use
+          querySnapshot.forEach((doc) => {
+            window.currentResetToken = resetToken;
+            window.currentResetUserId = doc.id;
+          });
+          
+          // Show new password form
+          window.showView('newPasswordForm');
+          window.history.replaceState({}, document.title, '/app.html');
+        } catch (error) {
+          console.error('Error checking reset token:', error);
+          alert('Error processing reset link. Please try again.');
+        }
+      }
+    }
+
+    // UPDATE PASSWORD
+    window.updatePassword = async function() {
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!newPassword || !confirmPassword) {
+        alert('Please fill in both password fields');
+        return;
+      }
+      
+      if (newPassword.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      try {
+        // Update password in database
+        await window.firestoreUpdateDoc(
+          window.firestoreDoc(window.firestoreDb, 'users', window.currentResetUserId),
+          { 
+            password: newPassword,
+            resetToken: null // Remove reset token
+          }
+        );
+
+        alert('✅ Password updated successfully!\n\nYou can now login with your new password.');
+        
+        // Clear form
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        // Go to home
+        window.showView('home');
+      } catch (error) {
+        console.error('Error updating password:', error);
+        alert('Error updating password. Please try again or contact support.');
+      }
+    };
+
     // LOGOUT
     window.logout = function() {
       window.currentUser = null;
@@ -1827,6 +1973,9 @@
       
       // Check for email verification
       await checkEmailVerification();
+      
+      // Check for password reset
+      await checkPasswordReset();
     });
   </script>
 </head>
@@ -1923,6 +2072,12 @@
           Login
         </button>
 
+        <div class="text-center">
+          <button type="button" onclick="showForgotPassword('customer')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+            Forgot Password?
+          </button>
+        </div>
+
         <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
           Back
         </button>
@@ -1966,8 +2121,71 @@
           Login
         </button>
 
+        <div class="text-center">
+          <button type="button" onclick="showForgotPassword('driver')" class="text-green-600 hover:text-green-800 text-sm font-medium">
+            Forgot Password?
+          </button>
+        </div>
+
         <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
           Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSWORD RESET -->
+  <div id="passwordReset" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Reset Password</h2>
+      
+      <div id="resetEmailForm" class="space-y-4">
+        <p class="text-gray-600 text-center mb-4">Enter your email address and we'll send you a link to reset your password.</p>
+        
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Email Address</label>
+          <input type="email" id="resetEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="your.email@example.com">
+        </div>
+
+        <button onclick="sendPasswordResetEmail()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+          Send Reset Link
+        </button>
+
+        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
+          Back
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW PASSWORD FORM (shown after clicking reset link) -->
+  <div id="newPasswordForm" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create New Password</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">New Password</label>
+          <div class="relative">
+            <input type="password" id="newPassword" required minlength="6" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="At least 6 characters">
+            <button type="button" onclick="togglePasswordVisibility('newPassword', 'newPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
+              <span id="newPasswordEyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Confirm New Password</label>
+          <div class="relative">
+            <input type="password" id="confirmPassword" required minlength="6" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Re-enter password">
+            <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
+              <span id="confirmPasswordEyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <button onclick="updatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+          Update Password
         </button>
       </div>
     </div>

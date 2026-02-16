@@ -1547,16 +1547,17 @@
         }
 
         // Create waypoints for Directions API (for multiple stops)
-        const waypoints = stops.slice(1, -1).map(stop => ({
+        // Include ALL stops as waypoints so Google can optimize the entire route
+        const waypoints = stops.map(stop => ({
           location: stop.address,
           stopover: true
         }));
 
-        console.log('Origin:', stops[0].address);
-        console.log('Destination:', stops[stops.length - 1].address);
+        console.log('Total stops to optimize:', stops.length);
         console.log('Waypoints:', waypoints);
 
-        // Use Directions Service
+        // Use current location as origin
+        // Google will optimize all waypoints and return best order
         const directionsService = new google.maps.DirectionsService();
         const directionsRenderer = new google.maps.DirectionsRenderer({
           map: map,
@@ -1564,20 +1565,26 @@
         });
 
         const request = {
-          origin: stops[0].address,
-          destination: stops[stops.length - 1].address,
+          origin: currentLocation, // Start from driver's current location
+          destination: currentLocation, // Return to starting point (or use last stop)
           waypoints: waypoints,
-          optimizeWaypoints: true, // This optimizes the route order!
+          optimizeWaypoints: true, // Google optimizes the order!
           travelMode: google.maps.TravelMode.DRIVING
         };
 
-        console.log('Sending directions request...');
+        console.log('Sending directions request with optimization...');
 
         directionsService.route(request, function(result, status) {
           console.log('Directions result:', status);
           
           if (status === 'OK') {
             directionsRenderer.setDirections(result);
+            
+            // Get the optimized order from Google
+            const optimizedOrder = result.routes[0].waypoint_order;
+            console.log('Google optimized order:', optimizedOrder);
+            console.log('Original order:', stops.map((s, i) => `${i}: ${s.customerName}`));
+            console.log('Optimized order:', optimizedOrder.map(i => `${i}: ${stops[i].customerName}`));
             
             // Display route summary
             const route = result.routes[0];
@@ -1594,8 +1601,8 @@
             document.getElementById('totalDuration').textContent = 
               Math.round(totalDuration / 60) + ' minutes';
 
-            // Display turn-by-turn directions
-            displayDirections(result, stops);
+            // Display turn-by-turn directions with optimized order
+            displayDirections(result, stops, optimizedOrder);
           } else {
             alert('Could not create route: ' + status + '\n\nThis might be because:\n- Addresses are not specific enough\n- Addresses are not in the same region\n- Google Maps API issue\n\nCheck console for details.');
             console.error('Directions request failed:', status);
@@ -1610,15 +1617,51 @@
     };
 
     // DISPLAY DIRECTIONS
-    function displayDirections(result, stops) {
+    function displayDirections(result, stops, optimizedOrder) {
       const directionsDiv = document.getElementById('directions');
-      directionsDiv.innerHTML = '<h3 class="font-bold text-gray-800 mb-3">Turn-by-Turn Directions</h3>';
+      
+      // Show optimization message
+      let headerHTML = '<h3 class="font-bold text-gray-800 mb-3">🚀 Optimized Route</h3>';
+      if (optimizedOrder && optimizedOrder.length > 0) {
+        headerHTML += '<p class="text-sm text-green-600 mb-3">✓ Google Maps optimized your stops for fastest delivery!</p>';
+      }
+      directionsDiv.innerHTML = headerHTML;
 
       const route = result.routes[0];
       let stopNumber = 1;
 
+      // Create ordered stops list based on optimization
+      const orderedStops = optimizedOrder ? optimizedOrder.map(i => stops[i]) : stops;
+
       route.legs.forEach((leg, index) => {
-        // Stop header
+        // Skip first leg (from current location to first stop)
+        if (index === 0) {
+          const stopDiv = document.createElement('div');
+          stopDiv.className = 'mb-4 pb-4 border-b border-gray-300';
+          
+          const stopHeader = document.createElement('div');
+          stopHeader.className = 'bg-blue-100 rounded-lg p-3 mb-2';
+          stopHeader.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-bold text-gray-800">📍 Start: Your Current Location</p>
+                <p class="text-sm text-gray-600">to Stop 1: ${orderedStops[0] ? orderedStops[0].customerName : 'First Stop'}</p>
+              </div>
+              <div class="text-right text-sm text-gray-600">
+                <p>${leg.distance.text}</p>
+                <p>${leg.duration.text}</p>
+              </div>
+            </div>
+          `;
+          stopDiv.appendChild(stopHeader);
+          directionsDiv.appendChild(stopDiv);
+          return;
+        }
+
+        // Regular stops
+        const actualStopIndex = index - 1;
+        if (actualStopIndex >= orderedStops.length) return;
+
         const stopDiv = document.createElement('div');
         stopDiv.className = 'mb-4 pb-4 border-b border-gray-300';
         
@@ -1627,9 +1670,9 @@
         stopHeader.innerHTML = `
           <div class="flex justify-between items-start">
             <div>
-              <p class="font-bold text-gray-800">Stop ${stopNumber}: ${stops[index].customerName}</p>
-              <p class="text-sm text-gray-600">${stops[index].address}</p>
-              <p class="text-sm text-gray-600">Phone: ${stops[index].customerPhone}</p>
+              <p class="font-bold text-gray-800">Stop ${stopNumber}: ${orderedStops[actualStopIndex].customerName}</p>
+              <p class="text-sm text-gray-600">${orderedStops[actualStopIndex].address}</p>
+              <p class="text-sm text-gray-600">Phone: ${orderedStops[actualStopIndex].customerPhone}</p>
             </div>
             <div class="text-right text-sm text-gray-600">
               <p>${leg.distance.text}</p>
@@ -1655,15 +1698,15 @@
         stopNumber++;
       });
 
-      // Add "Open in Google Maps" button
+      // Add "Open in Google Maps" button with optimized order
       const openMapsBtn = document.createElement('button');
       openMapsBtn.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg mt-4';
-      openMapsBtn.textContent = '🗺️ Open Route in Google Maps';
+      openMapsBtn.textContent = '🗺️ Open Optimized Route in Google Maps';
       openMapsBtn.onclick = function() {
-        const origin = encodeURIComponent(stops[0].address);
-        const destination = encodeURIComponent(stops[stops.length - 1].address);
-        const waypointsStr = stops.slice(1, -1).map(s => encodeURIComponent(s.address)).join('|');
-        const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsStr}&travelmode=driving`;
+        // Build Google Maps URL with optimized order
+        const waypointsStr = orderedStops.map(s => encodeURIComponent(s.address)).join('|');
+        // Use "dir" endpoint which supports waypoint optimization
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(orderedStops[orderedStops.length - 1].address)}&waypoints=${waypointsStr}&travelmode=driving`;
         window.open(url, '_blank');
       };
       directionsDiv.appendChild(openMapsBtn);

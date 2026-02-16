@@ -29,6 +29,10 @@
   
   <!-- Non-module script for immediate functions -->
   <script>
+    // Initialize global variables
+    window.currentPickups = [];
+    window.selectedPickupIds = new Set();
+    
     // Navigation function available immediately
     window.goToView = function(viewName) {
       document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
@@ -523,10 +527,6 @@
     };
 
     // LOAD PICKUP REQUESTS
-    // Store pickups globally for sorting and bulk operations
-    window.currentPickups = [];
-    window.selectedPickupIds = new Set();
-
     async function loadPickupRequests(sortOrder = null) {
       const requestsContainer = document.getElementById('pickupRequests');
       requestsContainer.innerHTML = '';
@@ -666,12 +666,15 @@
     // UPDATE BULK DELETE CONTROLS
     function updateBulkDeleteControls() {
       const controls = document.getElementById('bulkDeleteControls');
+      if (!controls) return; // Element doesn't exist yet
+      
       const count = window.selectedPickupIds.size;
       
       if (count > 0) {
         controls.classList.remove('hidden');
         controls.classList.add('flex');
-        document.getElementById('selectedCount').textContent = count;
+        const selectedCountEl = document.getElementById('selectedCount');
+        if (selectedCountEl) selectedCountEl.textContent = count;
       } else {
         controls.classList.add('hidden');
         controls.classList.remove('flex');

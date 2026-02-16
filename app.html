@@ -1731,7 +1731,7 @@
 
         console.log('Sending directions request with optimization...');
 
-        directionsService.route(request, function(result, status) {
+        directionsService.route(request, async function(result, status) {
           console.log('Directions result:', status);
           
           if (status === 'OK') {

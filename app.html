@@ -523,7 +523,11 @@
     };
 
     // LOAD PICKUP REQUESTS
-    async function loadPickupRequests() {
+    // Store pickups globally for sorting and bulk operations
+    window.currentPickups = [];
+    window.selectedPickupIds = new Set();
+
+    async function loadPickupRequests(sortOrder = null) {
       const requestsContainer = document.getElementById('pickupRequests');
       requestsContainer.innerHTML = '';
 
@@ -534,13 +538,38 @@
         
         if (querySnapshot.empty) {
           requestsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No pickup requests yet</p>';
+          window.currentPickups = [];
           return;
         }
 
+        // Store pickups with IDs
+        window.currentPickups = [];
         querySnapshot.forEach((doc) => {
-          const request = doc.data();
+          window.currentPickups.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Sort if order provided (from route optimization)
+        if (sortOrder && sortOrder.length > 0) {
+          const sortedPickups = [];
+          sortOrder.forEach(index => {
+            if (window.currentPickups[index]) {
+              sortedPickups.push(window.currentPickups[index]);
+            }
+          });
+          // Add any remaining pickups not in the sort order
+          window.currentPickups.forEach(pickup => {
+            if (!sortedPickups.find(p => p.id === pickup.id)) {
+              sortedPickups.push(pickup);
+            }
+          });
+          window.currentPickups = sortedPickups;
+        }
+
+        // Display pickups
+        window.currentPickups.forEach((request) => {
           const requestDiv = document.createElement('div');
           requestDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-4';
+          requestDiv.dataset.pickupId = request.id;
           
           const statusColor = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -549,14 +578,29 @@
             'cancelled': 'bg-red-100 text-red-800'
           }[request.status] || 'bg-gray-100 text-gray-800';
           
+          // Show checkbox only for completed/cancelled
+          const showCheckbox = request.status === 'completed' || request.status === 'cancelled';
+          
           requestDiv.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-bold text-gray-800">${request.customerName}</h3>
-              <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">
-                ${request.status.toUpperCase()}
-              </span>
+            <div class="flex items-start gap-3 mb-2">
+              ${showCheckbox ? `
+                <input 
+                  type="checkbox" 
+                  class="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  onchange="togglePickupSelection('${request.id}')"
+                  ${window.selectedPickupIds.has(request.id) ? 'checked' : ''}
+                />
+              ` : ''}
+              <div class="flex-1">
+                <div class="flex justify-between items-start">
+                  <h3 class="font-bold text-gray-800">${request.customerName}</h3>
+                  <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">
+                    ${request.status.toUpperCase()}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div class="space-y-1 text-sm text-gray-600 mb-3">
+            <div class="space-y-1 text-sm text-gray-600 mb-3 ${showCheckbox ? 'ml-7' : ''}">
               <p><strong>Date:</strong> ${new Date((request.pickupDate || request.date) + 'T00:00:00').toLocaleDateString()}</p>
               <p><strong>Boxes:</strong> ${request.boxes || 'Not specified'}</p>
               <p><strong>Phone:</strong> ${request.customerPhone}</p>
@@ -564,47 +608,149 @@
               <p><strong>Address:</strong> ${request.customerAddress}</p>
               ${request.notes ? `<p class="bg-yellow-50 border-l-4 border-yellow-400 p-2 mt-2"><strong>📝 Customer Notes:</strong><br>${request.notes}</p>` : ''}
             </div>
-            ${request.status === 'pending' ? `
-              <div class="flex gap-2">
+            <div class="${showCheckbox ? 'ml-7' : ''}">
+              ${request.status === 'pending' ? `
+                <div class="flex gap-2">
+                  <button 
+                    onclick="updatePickupStatus('${request.id}', 'confirmed')"
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"
+                  >
+                    Confirm
+                  </button>
+                  <button 
+                    onclick="updatePickupStatus('${request.id}', 'cancelled')"
+                    class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm"
+                  >
+                    Decline
+                  </button>
+                </div>
+              ` : ''}
+              ${request.status === 'confirmed' ? `
                 <button 
-                  onclick="updatePickupStatus('${doc.id}', 'confirmed')"
-                  class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"
+                  onclick="updatePickupStatus('${request.id}', 'completed')"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
                 >
-                  Confirm
+                  Mark as Completed
                 </button>
+              ` : ''}
+              ${!showCheckbox && (request.status === 'completed' || request.status === 'cancelled') ? `
                 <button 
-                  onclick="updatePickupStatus('${doc.id}', 'cancelled')"
-                  class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm"
+                  onclick="deletePickup('${request.id}')"
+                  class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm"
                 >
-                  Decline
+                  Delete Pickup
                 </button>
-              </div>
-            ` : ''}
-            ${request.status === 'confirmed' ? `
-              <button 
-                onclick="updatePickupStatus('${doc.id}', 'completed')"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
-              >
-                Mark as Completed
-              </button>
-            ` : ''}
-            ${request.status === 'completed' || request.status === 'cancelled' ? `
-              <button 
-                onclick="deletePickup('${doc.id}')"
-                class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm"
-              >
-                Delete Pickup
-              </button>
-            ` : ''}
+              ` : ''}
+            </div>
           `;
           requestsContainer.appendChild(requestDiv);
         });
 
-        document.getElementById('requestCount').textContent = querySnapshot.size;
+        document.getElementById('requestCount').textContent = window.currentPickups.length;
+        updateBulkDeleteControls();
       } catch (error) {
         console.error('Error loading requests:', error);
       }
     }
+
+    // TOGGLE PICKUP SELECTION
+    window.togglePickupSelection = function(pickupId) {
+      if (window.selectedPickupIds.has(pickupId)) {
+        window.selectedPickupIds.delete(pickupId);
+      } else {
+        window.selectedPickupIds.add(pickupId);
+      }
+      updateBulkDeleteControls();
+    };
+
+    // UPDATE BULK DELETE CONTROLS
+    function updateBulkDeleteControls() {
+      const controls = document.getElementById('bulkDeleteControls');
+      const count = window.selectedPickupIds.size;
+      
+      if (count > 0) {
+        controls.classList.remove('hidden');
+        controls.classList.add('flex');
+        document.getElementById('selectedCount').textContent = count;
+      } else {
+        controls.classList.add('hidden');
+        controls.classList.remove('flex');
+      }
+    }
+
+    // CLEAR SELECTION
+    window.clearSelection = function() {
+      window.selectedPickupIds.clear();
+      loadPickupRequests();
+    };
+
+    // SORT PICKUP REQUESTS BY ROUTE ORDER
+    async function sortPickupRequestsByRoute(stops, optimizedOrder) {
+      if (!optimizedOrder || optimizedOrder.length === 0) return;
+      
+      // Create a mapping of address to original index
+      const addressToIndex = {};
+      stops.forEach((stop, index) => {
+        addressToIndex[stop.address] = index;
+      });
+      
+      // Map current pickups to their route order
+      const pickupOrder = [];
+      window.currentPickups.forEach(pickup => {
+        const index = addressToIndex[pickup.customerAddress];
+        if (index !== undefined) {
+          const optimizedIndex = optimizedOrder.indexOf(index);
+          pickupOrder.push({ pickup, order: optimizedIndex >= 0 ? optimizedIndex : 999 });
+        } else {
+          pickupOrder.push({ pickup, order: 999 }); // Not in route
+        }
+      });
+      
+      // Sort by route order
+      pickupOrder.sort((a, b) => a.order - b.order);
+      const sortedIds = pickupOrder.map(item => item.pickup.id);
+      
+      // Find indices in original array
+      const sortIndices = sortedIds.map(id => 
+        window.currentPickups.findIndex(p => p.id === id)
+      );
+      
+      // Reload with sorted order
+      await loadPickupRequests(sortIndices);
+      
+      // Show success message
+      const successMsg = document.createElement('div');
+      successMsg.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4';
+      successMsg.innerHTML = '✓ Pickup requests sorted to match your optimized route!';
+      document.getElementById('pickupRequests').insertBefore(successMsg, document.getElementById('pickupRequests').firstChild);
+      setTimeout(() => successMsg.remove(), 5000);
+    }
+
+    // DELETE SELECTED PICKUPS
+    window.deleteSelectedPickups = async function() {
+      const count = window.selectedPickupIds.size;
+      if (!confirm(`Delete ${count} selected pickup${count > 1 ? 's' : ''}?`)) {
+        return;
+      }
+
+      try {
+        const deletePromises = Array.from(window.selectedPickupIds).map(pickupId =>
+          window.firestoreDeleteDoc(
+            window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId)
+          )
+        );
+
+        await Promise.all(deletePromises);
+        
+        window.selectedPickupIds.clear();
+        alert(`✅ ${count} pickup${count > 1 ? 's' : ''} deleted successfully!`);
+        await loadPickupRequests();
+        await loadDriverAvailability();
+      } catch (error) {
+        console.error('Error deleting pickups:', error);
+        alert('Error deleting pickups: ' + error.message);
+      }
+    };
 
     // UPDATE PICKUP STATUS
     window.updatePickupStatus = async function(pickupId, newStatus) {
@@ -1611,6 +1757,9 @@
 
             // Display turn-by-turn directions with optimized order
             displayDirections(result, stops, optimizedOrder);
+            
+            // Auto-sort pickup requests list to match route order
+            await sortPickupRequestsByRoute(stops, optimizedOrder);
           } else {
             alert('Could not create route: ' + status + '\n\nThis might be because:\n- Addresses are not specific enough\n- Addresses are not in the same region\n- Google Maps API issue\n\nCheck console for details.');
             console.error('Directions request failed:', status);
@@ -2385,7 +2534,18 @@
         </div>
 
         <div class="bg-white rounded-2xl shadow-xl p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Pickup Requests (<span id="requestCount">0</span>)</h2>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Pickup Requests (<span id="requestCount">0</span>)</h2>
+            <div id="bulkDeleteControls" class="hidden flex gap-2">
+              <span class="text-sm text-gray-600"><span id="selectedCount">0</span> selected</span>
+              <button onclick="deleteSelectedPickups()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-semibold">
+                Delete Selected
+              </button>
+              <button onclick="clearSelection()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded text-sm">
+                Clear
+              </button>
+            </div>
+          </div>
           <div id="pickupRequests" class="space-y-4 max-h-96 overflow-y-auto"></div>
         </div>
       </div>

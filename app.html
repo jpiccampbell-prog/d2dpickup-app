@@ -610,7 +610,7 @@
             </div>
             <div class="${showCheckbox ? 'ml-7' : ''}">
               ${request.status === 'pending' ? `
-                <div class="flex gap-2">
+                <div class="flex gap-2 mb-2">
                   <button 
                     onclick="updatePickupStatus('${request.id}', 'confirmed')"
                     class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"
@@ -624,14 +624,28 @@
                     Decline
                   </button>
                 </div>
+                <button 
+                  onclick="deletePickup('${request.id}')"
+                  class="w-full bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm"
+                >
+                  🗑️ Delete (No Email Sent)
+                </button>
               ` : ''}
               ${request.status === 'confirmed' ? `
-                <button 
-                  onclick="updatePickupStatus('${request.id}', 'completed')"
-                  class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
-                >
-                  Mark as Completed
-                </button>
+                <div class="flex gap-2">
+                  <button 
+                    onclick="updatePickupStatus('${request.id}', 'completed')"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+                  >
+                    Mark as Completed
+                  </button>
+                  <button 
+                    onclick="deletePickup('${request.id}')"
+                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               ` : ''}
               ${!showCheckbox && (request.status === 'completed' || request.status === 'cancelled') ? `
                 <button 
@@ -769,10 +783,21 @@
       }
 
       try {
+        // Get pickup details before updating
+        const pickupDoc = await window.firestoreGetDoc(
+          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId)
+        );
+        const pickupData = pickupDoc.data();
+
         await window.firestoreUpdateDoc(
           window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId),
           { status: newStatus }
         );
+        
+        // If confirming, send confirmation email to customer
+        if (newStatus === 'confirmed') {
+          await sendConfirmationEmail(pickupData);
+        }
         
         // If marking as completed, send email to next customer
         if (newStatus === 'completed') {
@@ -786,6 +811,32 @@
         alert('Error updating status: ' + error.message);
       }
     };
+
+    // SEND CONFIRMATION EMAIL TO CUSTOMER
+    async function sendConfirmationEmail(pickupData) {
+      try {
+        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        const emailParams = {
+          to_email: pickupData.customerEmail,
+          to_name: pickupData.customerName,
+          subject: 'Pickup Confirmed - ' + window.currentUser.companyName,
+          message: `Great news! Your pickup has been confirmed.\n\nPickup Details:\n• Date: ${pickupDate}\n• Number of Boxes: ${pickupData.boxes || 'Not specified'}\n• Pickup Address: ${pickupData.customerAddress}\n${pickupData.notes ? `• Your Notes: ${pickupData.notes}\n` : ''}\nDriver: ${window.currentUser.companyName}\nContact: ${window.currentUser.phone}\n\nWe'll notify you when we're on the way!`,
+          link: ''
+        };
+
+        await emailjs.send('service_itfrzub', 'template_verify', emailParams);
+        console.log('Confirmation email sent to customer');
+      } catch (error) {
+        console.error('Error sending confirmation email:', error);
+        // Don't fail the whole operation if email fails
+      }
+    }
 
     // NOTIFY NEXT CUSTOMER
     async function notifyNextCustomer(completedPickupId) {

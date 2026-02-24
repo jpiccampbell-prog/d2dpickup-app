@@ -528,7 +528,7 @@
     };
 
     // LOAD PICKUP REQUESTS
-    async function loadPickupRequests(sortOrder = null) {
+    async function loadPickupRequests() {
       const requestsContainer = document.getElementById('pickupRequests');
       requestsContainer.innerHTML = '';
 
@@ -543,30 +543,15 @@
           return;
         }
 
-        // Store pickups with IDs
-        window.currentPickups = [];
-        querySnapshot.forEach((doc) => {
-          window.currentPickups.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Sort if order provided (from route optimization)
-        if (sortOrder && sortOrder.length > 0) {
-          const sortedPickups = [];
-          sortOrder.forEach(index => {
-            if (window.currentPickups[index]) {
-              sortedPickups.push(window.currentPickups[index]);
-            }
+        // Only load from Firebase if we don't have a sorted array
+        if (!window.currentPickups || window.currentPickups.length === 0) {
+          window.currentPickups = [];
+          querySnapshot.forEach((doc) => {
+            window.currentPickups.push({ id: doc.id, ...doc.data() });
           });
-          // Add any remaining pickups not in the sort order
-          window.currentPickups.forEach(pickup => {
-            if (!sortedPickups.find(p => p.id === pickup.id)) {
-              sortedPickups.push(pickup);
-            }
-          });
-          window.currentPickups = sortedPickups;
         }
 
-        // Display pickups
+        // Display pickups (now respecting sorted order)
         window.currentPickups.forEach((request) => {
           const requestDiv = document.createElement('div');
           requestDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-4';
@@ -633,19 +618,27 @@
                 </button>
               ` : ''}
               ${request.status === 'confirmed' ? `
-                <div class="flex gap-2">
+                <div class="space-y-2">
                   <button 
-                    onclick="updatePickupStatus('${request.id}', 'completed')"
-                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+                    onclick="sendOnMyWayEmail('${request.id}')"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-semibold"
                   >
-                    Mark as Completed
+                    📍 Send "On My Way" Email
                   </button>
-                  <button 
-                    onclick="deletePickup('${request.id}')"
-                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm"
-                  >
-                    🗑️ Delete
-                  </button>
+                  <div class="flex gap-2">
+                    <button 
+                      onclick="updatePickupStatus('${request.id}', 'completed')"
+                      class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+                    >
+                      Mark as Completed
+                    </button>
+                    <button 
+                      onclick="deletePickup('${request.id}')"
+                      class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               ` : ''}
               ${!showCheckbox && (request.status === 'completed' || request.status === 'cancelled') ? `
@@ -704,44 +697,51 @@
 
     // SORT PICKUP REQUESTS BY ROUTE ORDER
     async function sortPickupRequestsByRoute(stops, optimizedOrder) {
-      if (!optimizedOrder || optimizedOrder.length === 0) return;
+      if (!optimizedOrder || optimizedOrder.length === 0) {
+        console.log('No optimized order to sort by');
+        return;
+      }
       
-      // Create a mapping of address to original index
-      const addressToIndex = {};
-      stops.forEach((stop, index) => {
-        addressToIndex[stop.address] = index;
-      });
+      console.log('Sorting pickups by route...');
+      console.log('Stops:', stops.map(s => s.customerName));
+      console.log('Optimized order:', optimizedOrder);
       
-      // Map current pickups to their route order
-      const pickupOrder = [];
-      window.currentPickups.forEach(pickup => {
-        const index = addressToIndex[pickup.customerAddress];
-        if (index !== undefined) {
-          const optimizedIndex = optimizedOrder.indexOf(index);
-          pickupOrder.push({ pickup, order: optimizedIndex >= 0 ? optimizedIndex : 999 });
-        } else {
-          pickupOrder.push({ pickup, order: 999 }); // Not in route
+      // Create new sorted array based on optimized route
+      const sortedPickups = [];
+      
+      // Add pickups in optimized route order
+      optimizedOrder.forEach(stopIndex => {
+        const stop = stops[stopIndex];
+        const pickup = window.currentPickups.find(p => 
+          p.customerAddress === stop.address
+        );
+        if (pickup) {
+          sortedPickups.push(pickup);
         }
       });
       
-      // Sort by route order
-      pickupOrder.sort((a, b) => a.order - b.order);
-      const sortedIds = pickupOrder.map(item => item.pickup.id);
+      // Add any pickups not in the route at the end
+      window.currentPickups.forEach(pickup => {
+        if (!sortedPickups.find(p => p.id === pickup.id)) {
+          sortedPickups.push(pickup);
+        }
+      });
       
-      // Find indices in original array
-      const sortIndices = sortedIds.map(id => 
-        window.currentPickups.findIndex(p => p.id === id)
-      );
+      // Update the global array
+      window.currentPickups = sortedPickups;
       
-      // Reload with sorted order
-      await loadPickupRequests(sortIndices);
+      // Reload display
+      await loadPickupRequests();
       
       // Show success message
+      const container = document.getElementById('pickupRequests');
       const successMsg = document.createElement('div');
       successMsg.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4';
       successMsg.innerHTML = '✓ Pickup requests sorted to match your optimized route!';
-      document.getElementById('pickupRequests').insertBefore(successMsg, document.getElementById('pickupRequests').firstChild);
+      container.insertBefore(successMsg, container.firstChild);
       setTimeout(() => successMsg.remove(), 5000);
+      
+      console.log('Sorted order:', sortedPickups.map(p => p.customerName));
     }
 
     // DELETE SELECTED PICKUPS
@@ -800,16 +800,55 @@
           await sendConfirmationEmail(pickupData);
         }
         
-        // If marking as completed, send email to next customer
-        if (newStatus === 'completed') {
-          await notifyNextCustomer(pickupId);
-        }
-        
         alert('Pickup status updated!');
         await loadPickupRequests();
       } catch (error) {
         console.error('Error updating pickup status:', error);
         alert('Error updating status: ' + error.message);
+      }
+    };
+
+    // SEND "ON MY WAY" EMAIL MANUALLY
+    window.sendOnMyWayEmail = async function(pickupId) {
+      if (!confirm('Send "On My Way" email to this customer?')) {
+        return;
+      }
+
+      try {
+        // Get pickup details
+        const pickupDoc = await window.firestoreGetDoc(
+          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId)
+        );
+        const pickupData = pickupDoc.data();
+
+        if (!pickupData) {
+          alert('Pickup not found');
+          return;
+        }
+
+        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        // Send "On My Way" email
+        const emailParams = {
+          to_email: pickupData.customerEmail,
+          to_name: pickupData.customerName,
+          subject: 'On My Way - ' + window.currentUser.companyName,
+          message: `Hi ${pickupData.customerName},\n\nI'm on my way to pick up your items!\n\nPickup Details:\n• Date: ${pickupDate}\n• Number of Boxes: ${pickupData.boxes || 'Not specified'}\n• Pickup Address: ${pickupData.customerAddress}\n\nI should arrive within 15-20 minutes.\n\nDriver: ${window.currentUser.companyName}\nContact: ${window.currentUser.phone}\n\nSee you soon!`,
+          link: ''
+        };
+
+        await emailjs.send('service_itfrzub', 'template_verify', emailParams);
+        
+        alert('✅ "On My Way" email sent to ' + pickupData.customerName + '!');
+        console.log('On My Way email sent successfully');
+      } catch (error) {
+        console.error('Error sending On My Way email:', error);
+        alert('Error sending email: ' + error.message);
       }
     };
 

@@ -763,6 +763,10 @@
         
         window.selectedPickupIds.clear();
         alert(`✅ ${count} pickup${count > 1 ? 's' : ''} deleted successfully!`);
+        
+        // Clear cached pickups to force fresh reload
+        window.currentPickups = [];
+        
         await loadPickupRequests();
         await loadDriverAvailability();
       } catch (error) {
@@ -801,6 +805,10 @@
         }
         
         alert('Pickup status updated!');
+        
+        // Clear cached pickups to force fresh reload
+        window.currentPickups = [];
+        
         await loadPickupRequests();
       } catch (error) {
         console.error('Error updating pickup status:', error);
@@ -969,6 +977,10 @@
         await deleteDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId));
         
         alert('Pickup deleted successfully!');
+        
+        // Clear cached pickups to force fresh reload
+        window.currentPickups = [];
+        
         await loadPickupRequests();
         
         // Also refresh availability to update capacity counts
@@ -2021,6 +2033,9 @@
         
         // Hide modal and reset form
         window.hideManualPickupForm();
+        
+        // Clear cached pickups to force fresh reload
+        window.currentPickups = [];
         
         // Refresh pickup requests and availability
         await loadPickupRequests();

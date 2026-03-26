@@ -1630,23 +1630,46 @@
           driver = { id: doc.id, ...doc.data() };
         });
 
-        // Create pickup request with boxes and notes
-        await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), {
-          customerId: window.currentUser.id,
-          customerName: window.currentUser.name,
-          customerEmail: window.currentUser.email,
-          customerPhone: window.currentUser.phone,
-          customerAddress: `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`,
-          driverId: driverId,
-          driverName: driver.name,
-          pickupDate: date,
-          boxes: boxes,
-          notes: notes || null,
-          status: 'pending',
-          createdAt: new Date().toISOString()
-        });
+       // Create pickup request with boxes and notes
+await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), {
+  customerId: window.currentUser.id,
+  customerName: window.currentUser.name,
+  customerEmail: window.currentUser.email,
+  customerPhone: window.currentUser.phone,
+  customerAddress: `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`,
+  driverId: driverId,
+  driverName: driver.name,
+  pickupDate: date,
+  boxes: boxes,
+  notes: notes || null,
+  status: 'pending',
+  createdAt: new Date().toISOString()
+});
 
-        alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDateString()}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}`);
+// 🔔 Notify driver by email
+try {
+  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  await emailjs.send(
+    'service_itfrzub',
+    'template_verify',        // reuse your existing template
+    {
+      to_email: driver.email,
+      user_name: driver.name,
+      subject: '📦 New Pickup Booking - Action Required',
+      message: `You have a new pickup request!\n\nCustomer: ${window.currentUser.name}\nPhone: ${window.currentUser.phone}\nEmail: ${window.currentUser.email}\nAddress: ${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}\nDate: ${formattedDate}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}\n\nPlease log in to confirm or decline this pickup.`,
+      link: window.location.origin + '/app.html'
+    }
+  );
+  console.log('Driver notified by email');
+} catch (emailError) {
+  console.error('Driver email failed:', emailError);
+  // Don't block the booking if email fails
+}
+
+alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDateString()}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}`);
         
         // Hide modal
         window.hideBookingModal();

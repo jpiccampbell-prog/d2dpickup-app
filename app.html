@@ -23,97 +23,50 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script type="text/javascript">
     (function(){
-      emailjs.init("ifXBFfbs2_okz6ha9"); // Your public key
+      emailjs.init("ifXBFfbs2_okz6ha9");
     })();
   </script>
   
   <!-- Non-module script for immediate functions -->
   <script>
-    // Initialize global variables
     window.currentPickups = [];
     window.selectedPickupIds = new Set();
     
-    // Navigation function available immediately
     window.goToView = function(viewName) {
       document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
       document.getElementById(viewName).classList.remove('hidden');
     };
     
-    // Placeholder functions - will be overridden when Firebase module loads
-    window.handleLogin = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.handleCreateAccount = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.searchDriver = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.loadSavedDrivers = function() {
-      // Will be overridden when Firebase loads
-    };
-    window.removeSavedDriver = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.schedulePickup = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.schedulePickupWithBoxes = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.toggleAvailability = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.createRoute = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.cancelPickup = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.deleteCustomerPickup = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.updatePickupStatus = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.deletePickup = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.showEditProfile = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.hideEditProfile = function() {
-      document.getElementById('editProfileModal').classList.add('hidden');
-    };
-    window.showCustomerEditProfile = function() {
-      alert('Please wait, app is loading...');
-    };
-    window.hideCustomerEditProfile = function() {
-      document.getElementById('editCustomerProfileModal').classList.add('hidden');
-    };
-    window.hideManualPickupForm = function() {
-      document.getElementById('manualPickupModal').classList.add('hidden');
-    };
+    window.handleLogin = function() { alert('Please wait, app is loading...'); };
+    window.handleCreateAccount = function() { alert('Please wait, app is loading...'); };
+    window.searchDriver = function() { alert('Please wait, app is loading...'); };
+    window.loadSavedDrivers = function() {};
+    window.removeSavedDriver = function() { alert('Please wait, app is loading...'); };
+    window.schedulePickup = function() { alert('Please wait, app is loading...'); };
+    window.schedulePickupWithBoxes = function() { alert('Please wait, app is loading...'); };
+    window.toggleAvailability = function() { alert('Please wait, app is loading...'); };
+    window.createRoute = function() { alert('Please wait, app is loading...'); };
+    window.cancelPickup = function() { alert('Please wait, app is loading...'); };
+    window.deleteCustomerPickup = function() { alert('Please wait, app is loading...'); };
+    window.updatePickupStatus = function() { alert('Please wait, app is loading...'); };
+    window.deletePickup = function() { alert('Please wait, app is loading...'); };
+    window.showEditProfile = function() { alert('Please wait, app is loading...'); };
+    window.hideEditProfile = function() { document.getElementById('editProfileModal').classList.add('hidden'); };
+    window.showCustomerEditProfile = function() { alert('Please wait, app is loading...'); };
+    window.hideCustomerEditProfile = function() { document.getElementById('editCustomerProfileModal').classList.add('hidden'); };
+    window.hideManualPickupForm = function() { document.getElementById('manualPickupModal').classList.add('hidden'); };
     window.toggleCompanyNameField = function() {
       const accountType = document.querySelector('input[name="accountType"]:checked').value;
       const companyField = document.getElementById('companyNameField');
-      if (accountType === 'driver') {
-        companyField.style.display = 'block';
-      } else {
-        companyField.style.display = 'none';
-      }
+      companyField.style.display = accountType === 'driver' ? 'block' : 'none';
     };
-    window.logout = function() {
-      window.goToView('home');
-    };
+    window.logout = function() { window.goToView('home'); };
   </script>
   
   <script type="module">
-    // Firebase imports
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getFirestore, collection, addDoc, query, where, getDocs, getDoc, doc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyA-Ld9uNp1wXJL8BrUGXy2wqHc-xhaz5IE",
       authDomain: "beta-door-to-door-app.firebaseapp.com",
@@ -123,16 +76,12 @@
       appId: "1:671413587492:web:2bb77a2df5337b627f12b1"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Global state - make accessible globally
     window.currentUser = null;
     window.currentView = 'home';
     window.db = db;
-
-    // Make Firebase functions available globally
     window.firebaseApp = app;
     window.firestoreDb = db;
     window.firestoreCollection = collection;
@@ -144,47 +93,26 @@
     window.firestoreDoc = doc;
     window.firestoreUpdateDoc = updateDoc;
 
-    // Helper function to generate driver ID
     function generateDriverId() {
       return 'DRV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     }
 
-    // Helper function to get next 30 days
     function getNext30Days() {
       const days = [];
-      // Get today's date components explicitly in local timezone
       const now = new Date();
-      console.log('=== DATE GENERATION DEBUG ===');
-      console.log('Current time:', now);
-      console.log('Current date string:', now.toLocaleDateString());
-      
       const todayYear = now.getFullYear();
       const todayMonth = now.getMonth();
       const todayDay = now.getDate();
-      
-      console.log('Today components:', { year: todayYear, month: todayMonth, day: todayDay });
-      
       for (let i = 0; i < 30; i++) {
-        // Create date explicitly using local year/month/day
         const date = new Date(todayYear, todayMonth, todayDay + i);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        const dateString = `${year}-${month}-${day}`;
-        
-        if (i === 0) {
-          console.log('First date generated:', dateString);
-          console.log('First date object:', date);
-        }
-        
-        days.push(dateString);
+        days.push(`${year}-${month}-${day}`);
       }
-      
-      console.log('All dates:', days);
       return days;
     }
 
-    // Show/hide views
     window.showView = function(viewName) {
       document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
       document.getElementById(viewName).classList.remove('hidden');
@@ -194,17 +122,11 @@
     // CREATE ACCOUNT
     window.handleCreateAccount = async function(event) {
       event.preventDefault();
-      
-      // Get the selected radio button value properly
       const accountTypeRadios = document.getElementsByName('accountType');
-      let accountType = 'customer'; // default
+      let accountType = 'customer';
       for (const radio of accountTypeRadios) {
-        if (radio.checked) {
-          accountType = radio.value;
-          break;
-        }
+        if (radio.checked) { accountType = radio.value; break; }
       }
-      
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -215,78 +137,41 @@
       const zipCode = document.getElementById('zipCode').value;
       const companyName = document.getElementById('companyName').value || '';
 
-      console.log('Creating account with type:', accountType);
-
       try {
-        // Check if email exists
         const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
         const q = window.firestoreQuery(usersRef, window.firestoreWhere('email', '==', email));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
-        if (!querySnapshot.empty) {
-          alert('An account with this email already exists!');
-          return;
-        }
+        if (!querySnapshot.empty) { alert('An account with this email already exists!'); return; }
 
-        // Create user data with verification token
         const driverId = accountType === 'driver' ? generateDriverId() : null;
         const verificationToken = 'verify-' + Math.random().toString(36).substr(2, 16) + Date.now();
-        
         const userData = {
-          accountType,
-          name,
-          email,
-          password,
-          phone,
-          street,
-          city,
-          state,
-          zipCode,
+          accountType, name, email, password, phone, street, city, state, zipCode,
           driverId,
           companyName: accountType === 'driver' ? companyName : null,
           emailVerified: false,
-          verificationToken: verificationToken,
+          verificationToken,
           createdAt: new Date().toISOString()
         };
 
-        // Save to Firestore
-        const docRef = await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'users'), userData);
+        await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'users'), userData);
 
-        // Send verification email
         try {
           const verificationLink = `${window.location.origin}/app.html?verify=${verificationToken}`;
-          
-          console.log('Sending verification email to:', email);
-          console.log('Verification link:', verificationLink);
-          console.log('EmailJS service ID: service_itfrzub');
-          console.log('EmailJS template ID: template_verify');
-          
-          const emailResponse = await emailjs.send(
-            'service_itfrzub',
-            'template_verify',
-            {
-              to_email: email,
-              user_name: name,
-              subject: 'Verify your D2D Pickup account',
-              message: 'Welcome to D2D Pickup! Please verify your email address to activate your account.',
-              link: verificationLink
-            }
-          );
-          
-          console.log('Email sent successfully!', emailResponse);
-
+          await emailjs.send('service_itfrzub', 'template_verify', {
+            to_email: email, user_name: name,
+            subject: 'Verify your D2D Pickup account',
+            message: 'Welcome to D2D Pickup! Please verify your email address to activate your account.',
+            link: verificationLink
+          });
           alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}A verification email has been sent to:\n${email}\n\nPlease check your email and click the verification link to activate your account.`);
         } catch (emailError) {
-          console.error('Error sending verification email:', emailError);
-          console.error('Error details:', emailError.text, emailError.status);
-          alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}Email: ${email}\nPassword: ${password}\n\n⚠️ Verification email failed to send.\n\nError: ${emailError.text || emailError.message}\n\nYou can still try to login, but your account needs verification. Contact support at jpiccampbell@yahoo.com`);
+          alert(`✅ ACCOUNT CREATED!\n\n${accountType === 'driver' ? 'Driver ID: ' + driverId + '\n\n' : ''}Email: ${email}\nPassword: ${password}\n\n⚠️ Verification email failed to send.\n\nError: ${emailError.text || emailError.message}\n\nContact support at jpiccampbell@yahoo.com`);
         }
 
-        // Reset form
         document.getElementById('createAccountForm').reset();
         window.showView('home');
       } catch (error) {
-        console.error('Error creating account:', error);
         alert('Error creating account: ' + error.message);
       }
     };
@@ -295,64 +180,28 @@
     window.handleLogin = async function(userType) {
       const email = document.getElementById(userType + 'LoginEmail').value;
       const password = document.getElementById(userType + 'LoginPassword').value;
-
       try {
-        console.log('Attempting login for:', userType, email);
-        console.log('Firebase DB:', window.firestoreDb);
-        
         const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
-        console.log('Users ref created:', usersRef);
-        
-        const q = window.firestoreQuery(usersRef, 
+        const q = window.firestoreQuery(usersRef,
           window.firestoreWhere('email', '==', email),
           window.firestoreWhere('password', '==', password),
           window.firestoreWhere('accountType', '==', userType)
         );
-        console.log('Query created for accountType:', userType);
-        
-        console.log('Executing query...');
         const querySnapshot = await window.firestoreGetDocs(q);
-        console.log('Query completed. Empty?', querySnapshot.empty);
-        console.log('Number of results:', querySnapshot.size);
-        
         if (querySnapshot.empty) {
-          console.log('No matching user found');
           alert('Invalid email or password!\n\nMake sure:\n- Email is correct\n- Password is correct\n- Account type is ' + userType);
           return;
         }
-
-        // Get user data
-        querySnapshot.forEach((doc) => {
-          window.currentUser = { id: doc.id, ...doc.data() };
-          console.log('User found:', window.currentUser);
-        });
-
-        console.log('Login successful, user:', window.currentUser);
-        
-        // Check if email is verified
+        querySnapshot.forEach((doc) => { window.currentUser = { id: doc.id, ...doc.data() }; });
         if (!window.currentUser.emailVerified) {
-          alert(`⚠️ Email Not Verified\n\nPlease check your email (${window.currentUser.email}) and click the verification link to activate your account.\n\nDidn't receive the email? Contact support at jpiccampbell@yahoo.com`);
+          alert(`⚠️ Email Not Verified\n\nPlease check your email (${window.currentUser.email}) and click the verification link.\n\nContact support at jpiccampbell@yahoo.com`);
           window.currentUser = null;
           return;
         }
-        
         alert(`Welcome ${window.currentUser.name}!`);
-        
-        try {
-          if (userType === 'driver') {
-            console.log('Loading driver dashboard...');
-            await loadDriverDashboard();
-          } else {
-            console.log('Loading customer dashboard...');
-            await loadCustomerDashboard();
-          }
-        } catch (dashboardError) {
-          console.error('Error loading dashboard:', dashboardError);
-          alert('Error loading dashboard: ' + dashboardError.message);
-        }
+        if (userType === 'driver') { await loadDriverDashboard(); }
+        else { await loadCustomerDashboard(); }
       } catch (error) {
-        console.error('Error logging in:', error);
-        console.error('Error details:', error.message, error.stack);
         alert('Error logging in: ' + error.message);
       }
     };
@@ -360,27 +209,18 @@
     // LOAD DRIVER DASHBOARD
     async function loadDriverDashboard() {
       try {
-        console.log('Showing driver dashboard view...');
         window.showView('driverDashboard');
-        
-        console.log('Setting driver info...');
         document.getElementById('driverName').textContent = window.currentUser.name;
         document.getElementById('driverIdDisplay').textContent = window.currentUser.driverId;
         document.getElementById('driverEmail').textContent = window.currentUser.email;
         document.getElementById('driverPhone').textContent = window.currentUser.phone;
         document.getElementById('driverCompanyName').textContent = window.currentUser.companyName || 'Not specified';
-        document.getElementById('driverAddress').textContent = 
+        document.getElementById('driverAddress').textContent =
           `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`;
-
-        console.log('Loading availability...');
-        // Load availability
         await loadDriverAvailability();
-        
-        console.log('Loading pickup requests...');
-        // Load pickup requests
         await loadPickupRequests();
-        
-        console.log('Driver dashboard loaded successfully');
+        await backfillDriverCustomers();
+        await loadDriverCustomers();
       } catch (error) {
         console.error('Error in loadDriverDashboard:', error);
         throw error;
@@ -392,88 +232,47 @@
       try {
         const availabilityContainer = document.getElementById('availabilityDates');
         availabilityContainer.innerHTML = '';
-
         const next30Days = getNext30Days();
-        
-        console.log('Fetching driver availability from Firebase...');
-        // Get driver's availability from Firestore
         const availRef = window.firestoreCollection(window.firestoreDb, 'availability');
         const q = window.firestoreQuery(availRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
         const availability = {};
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          availability[data.date] = {
-            available: data.available,
-            capacity: data.capacity || 0
-          };
+          availability[data.date] = { available: data.available, capacity: data.capacity || 0 };
         });
-
-        // Get current bookings to calculate used capacity
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
         const requestsQuery = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
         const requestsSnapshot = await window.firestoreGetDocs(requestsQuery);
-        
         const bookings = {};
         requestsSnapshot.forEach((doc) => {
           const data = doc.data();
           const dateKey = data.pickupDate || data.date;
-          if (data.status !== 'cancelled') {
-            bookings[dateKey] = (bookings[dateKey] || 0) + (data.boxes || 0);
-          }
+          if (data.status !== 'cancelled') { bookings[dateKey] = (bookings[dateKey] || 0) + (data.boxes || 0); }
         });
-
-        console.log('Creating date elements...');
-        next30Days.forEach((date, index) => {
-          if (index < 5) {  // Only log first 5 dates to avoid spam
-            console.log(`Calendar date ${index}:`, date);
-          }
+        next30Days.forEach((date) => {
           const dateAvail = availability[date];
           const isAvailable = dateAvail?.available || false;
           const capacity = dateAvail?.capacity || 0;
           const booked = bookings[date] || 0;
           const remaining = capacity - booked;
-          
           const dateDiv = document.createElement('div');
-          dateDiv.className = `p-3 rounded-lg transition ${
-            isAvailable 
-              ? 'bg-green-100 border-2 border-green-500' 
-              : 'bg-gray-50 border-2 border-gray-200 hover:bg-gray-100'
-          }`;
-          
+          dateDiv.className = `p-3 rounded-lg transition ${isAvailable ? 'bg-green-100 border-2 border-green-500' : 'bg-gray-50 border-2 border-gray-200 hover:bg-gray-100'}`;
           dateDiv.innerHTML = `
             <div class="flex justify-between items-center gap-2">
               <div class="flex-1 cursor-pointer hover:opacity-80" onclick="window.toggleAvailability('${date}', ${!isAvailable})">
                 <span class="font-medium text-gray-700">
                   ${new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>
-                ${isAvailable ? `
-                  <div class="text-xs text-gray-600 mt-1">
-                    Capacity: ${booked}/${capacity} boxes
-                    ${remaining <= 0 ? '<span class="text-red-600 font-semibold"> (FULL)</span>' : ''}
-                  </div>
-                ` : ''}
+                ${isAvailable ? `<div class="text-xs text-gray-600 mt-1">Capacity: ${booked}/${capacity} boxes${remaining <= 0 ? '<span class="text-red-600 font-semibold"> (FULL)</span>' : ''}</div>` : ''}
               </div>
               <div class="flex items-center gap-2">
                 ${isAvailable ? '<span class="text-green-600 font-semibold text-sm">✓</span>' : ''}
-                ${isAvailable && remaining > 0 ? `
-                  <button 
-                    onclick="window.showManualPickupForm('${date}', ${remaining})"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs whitespace-nowrap"
-                    title="Add phone-in customer"
-                  >
-                    + Add
-                  </button>
-                ` : ''}
+                ${isAvailable && remaining > 0 ? `<button onclick="window.showManualPickupForm('${date}', ${remaining})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs whitespace-nowrap" title="Add phone-in customer">+ Add</button>` : ''}
               </div>
-            </div>
-          `;
-          
+            </div>`;
           availabilityContainer.appendChild(dateDiv);
         });
-        
-        console.log('Availability loaded successfully');
       } catch (error) {
         console.error('Error in loadDriverAvailability:', error);
         throw error;
@@ -483,43 +282,28 @@
     // TOGGLE AVAILABILITY
     window.toggleAvailability = async function(date, available) {
       try {
-        // If turning ON availability, ask for capacity
         let capacity = null;
         if (available) {
           const capacityInput = prompt('How many boxes can you pick up on this date?', '50');
-          if (capacityInput === null) return; // User cancelled
+          if (capacityInput === null) return;
           capacity = parseInt(capacityInput);
-          if (isNaN(capacity) || capacity <= 0) {
-            alert('Please enter a valid number of boxes');
-            return;
-          }
+          if (isNaN(capacity) || capacity <= 0) { alert('Please enter a valid number of boxes'); return; }
         }
-
         const availRef = window.firestoreCollection(window.firestoreDb, 'availability');
-        const q = window.firestoreQuery(availRef, 
+        const q = window.firestoreQuery(availRef,
           window.firestoreWhere('driverId', '==', window.currentUser.driverId),
           window.firestoreWhere('date', '==', date)
         );
         const querySnapshot = await window.firestoreGetDocs(q);
-        
         if (querySnapshot.empty) {
-          // Create new availability record
-          await window.firestoreAddDoc(availRef, {
-            driverId: window.currentUser.driverId,
-            date: date,
-            available: available,
-            capacity: capacity || 0
-          });
+          await window.firestoreAddDoc(availRef, { driverId: window.currentUser.driverId, date, available, capacity: capacity || 0 });
         } else {
-          // Update existing record
           querySnapshot.forEach(async (document) => {
             await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'availability', document.id), {
-              available: available,
-              capacity: available ? capacity : 0
+              available, capacity: available ? capacity : 0
             });
           });
         }
-        
         await loadDriverAvailability();
       } catch (error) {
         console.error('Error toggling availability:', error);
@@ -531,36 +315,24 @@
     async function loadPickupRequests() {
       const requestsContainer = document.getElementById('pickupRequests');
       requestsContainer.innerHTML = '';
-
       try {
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
         const q = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
         if (querySnapshot.empty) {
           requestsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">No pickup requests yet</p>';
           window.currentPickups = [];
           return;
         }
-
-        // Only load from Firebase if we don't have a sorted array
         if (!window.currentPickups || window.currentPickups.length === 0) {
           window.currentPickups = [];
-          querySnapshot.forEach((doc) => {
-            window.currentPickups.push({ id: doc.id, ...doc.data() });
-          });
+          querySnapshot.forEach((doc) => { window.currentPickups.push({ id: doc.id, ...doc.data() }); });
         }
-
-     // Create table header
         const tableHTML = `
           <div class="mb-4">
-            <input 
-              type="text" 
-              id="customerSearch" 
-              placeholder="🔍 Search by name, phone, email, or address..." 
+            <input type="text" id="customerSearch" placeholder="🔍 Search by name, phone, email, or address..."
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-              oninput="filterPickups()"
-            />
+              oninput="filterPickups()" />
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm border-collapse">
@@ -580,12 +352,9 @@
               </thead>
               <tbody id="pickupTableBody"></tbody>
             </table>
-          </div>
-        `;
-        
+          </div>`;
         requestsContainer.innerHTML = tableHTML;
         const tbody = document.getElementById('pickupTableBody');
-        
         window.currentPickups.forEach((request) => {
           const statusColor = {
             'pending': 'bg-yellow-100 text-yellow-800',
@@ -593,9 +362,7 @@
             'completed': 'bg-blue-100 text-blue-800',
             'cancelled': 'bg-red-100 text-red-800'
           }[request.status] || 'bg-gray-100 text-gray-800';
-          
           const showCheckbox = request.status === 'completed' || request.status === 'cancelled';
-          
           const row = document.createElement('tr');
           row.className = 'hover:bg-gray-50 pickup-row';
           row.dataset.pickupId = request.id;
@@ -603,23 +370,11 @@
           row.dataset.customerPhone = request.customerPhone.toLowerCase();
           row.dataset.customerEmail = request.customerEmail.toLowerCase();
           row.dataset.customerAddress = request.customerAddress.toLowerCase();
-          
           row.innerHTML = `
             <td class="border px-2 py-2 text-center">
-              ${showCheckbox ? `
-                <input 
-                  type="checkbox" 
-                  class="w-4 h-4"
-                  onchange="togglePickupSelection('${request.id}')"
-                  ${window.selectedPickupIds.has(request.id) ? 'checked' : ''}
-                />
-              ` : ''}
+              ${showCheckbox ? `<input type="checkbox" class="w-4 h-4" onchange="togglePickupSelection('${request.id}')" ${window.selectedPickupIds.has(request.id) ? 'checked' : ''} />` : ''}
             </td>
-            <td class="border px-2 py-2">
-              <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">
-                ${request.status.toUpperCase()}
-              </span>
-            </td>
+            <td class="border px-2 py-2"><span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">${request.status.toUpperCase()}</span></td>
             <td class="border px-2 py-2 font-semibold">${request.customerName}</td>
             <td class="border px-2 py-2 whitespace-nowrap">${new Date((request.pickupDate || request.date) + 'T00:00:00').toLocaleDateString()}</td>
             <td class="border px-2 py-2 text-center">${request.boxes || 'N/A'}</td>
@@ -630,262 +385,134 @@
             <td class="border px-2 py-2">
               <div class="flex flex-col gap-1">
                 ${request.status === 'pending' ? `
-                  <button onclick="updatePickupStatus('${request.id}', 'confirmed')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    ✓ Confirm
-                  </button>
-                  <button onclick="updatePickupStatus('${request.id}', 'cancelled')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    ✗ Decline
-                  </button>
-                  <button onclick="deletePickup('${request.id}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    🗑️ Delete
-                  </button>
-                ` : ''}
+                  <button onclick="updatePickupStatus('${request.id}', 'confirmed')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">✓ Confirm</button>
+                  <button onclick="updatePickupStatus('${request.id}', 'cancelled')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap">✗ Decline</button>
+                  <button onclick="deletePickup('${request.id}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">🗑️ Delete</button>` : ''}
                 ${request.status === 'confirmed' ? `
-                  <button onclick="sendOnMyWayEmail('${request.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    📍 On My Way
-                  </button>
-                  <button onclick="updatePickupStatus('${request.id}', 'completed')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    ✓ Complete
-                  </button>
-                  <button onclick="deletePickup('${request.id}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    🗑️ Delete
-                  </button>
-                ` : ''}
+                  <button onclick="sendOnMyWayEmail('${request.id}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">📍 On My Way</button>
+                  <button onclick="updatePickupStatus('${request.id}', 'completed')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">✓ Complete</button>
+                  <button onclick="deletePickup('${request.id}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded text-xs whitespace-nowrap">🗑️ Delete</button>` : ''}
                 ${(request.status === 'completed' || request.status === 'cancelled') ? `
-                  <button onclick="deletePickup('${request.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                    🗑️ Delete
-                  </button>
-                ` : ''}
+                  <button onclick="deletePickup('${request.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap">🗑️ Delete</button>` : ''}
               </div>
-            </td>
-          `;
-          
+            </td>`;
           tbody.appendChild(row);
         });
-
         document.getElementById('requestCount').textContent = window.currentPickups.length;
         updateBulkDeleteControls();
       } catch (error) {
         console.error('Error loading requests:', error);
       }
     }
-    
-    // FILTER PICKUPS FUNCTION
+
     window.filterPickups = function() {
       const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('.pickup-row');
-      
-      rows.forEach(row => {
-        const name = row.dataset.customerName || '';
-        const phone = row.dataset.customerPhone || '';
-        const email = row.dataset.customerEmail || '';
-        const address = row.dataset.customerAddress || '';
-        
-        if (name.includes(searchTerm) || phone.includes(searchTerm) || 
-            email.includes(searchTerm) || address.includes(searchTerm)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
+      document.querySelectorAll('.pickup-row').forEach(row => {
+        const match = (row.dataset.customerName || '').includes(searchTerm) ||
+          (row.dataset.customerPhone || '').includes(searchTerm) ||
+          (row.dataset.customerEmail || '').includes(searchTerm) ||
+          (row.dataset.customerAddress || '').includes(searchTerm);
+        row.style.display = match ? '' : 'none';
       });
     };
-    
 
-    // TOGGLE PICKUP SELECTION
     window.togglePickupSelection = function(pickupId) {
-      if (window.selectedPickupIds.has(pickupId)) {
-        window.selectedPickupIds.delete(pickupId);
-      } else {
-        window.selectedPickupIds.add(pickupId);
-      }
+      if (window.selectedPickupIds.has(pickupId)) { window.selectedPickupIds.delete(pickupId); }
+      else { window.selectedPickupIds.add(pickupId); }
       updateBulkDeleteControls();
     };
 
-    // UPDATE BULK DELETE CONTROLS
     function updateBulkDeleteControls() {
       const controls = document.getElementById('bulkDeleteControls');
-      if (!controls) return; // Element doesn't exist yet
-      
+      if (!controls) return;
       const count = window.selectedPickupIds.size;
-      
       if (count > 0) {
-        controls.classList.remove('hidden');
-        controls.classList.add('flex');
-        const selectedCountEl = document.getElementById('selectedCount');
-        if (selectedCountEl) selectedCountEl.textContent = count;
+        controls.classList.remove('hidden'); controls.classList.add('flex');
+        const el = document.getElementById('selectedCount');
+        if (el) el.textContent = count;
       } else {
-        controls.classList.add('hidden');
-        controls.classList.remove('flex');
+        controls.classList.add('hidden'); controls.classList.remove('flex');
       }
     }
 
-    // CLEAR SELECTION
     window.clearSelection = function() {
       window.selectedPickupIds.clear();
       loadPickupRequests();
     };
 
-    // SORT PICKUP REQUESTS BY ROUTE ORDER
     async function sortPickupRequestsByRoute(stops, optimizedOrder) {
-      if (!optimizedOrder || optimizedOrder.length === 0) {
-        console.log('No optimized order to sort by');
-        return;
-      }
-      
-      console.log('Sorting pickups by route...');
-      console.log('Stops:', stops.map(s => s.customerName));
-      console.log('Optimized order:', optimizedOrder);
-      
-      // Create new sorted array based on optimized route
+      if (!optimizedOrder || optimizedOrder.length === 0) return;
       const sortedPickups = [];
-      
-      // Add pickups in optimized route order
       optimizedOrder.forEach(stopIndex => {
         const stop = stops[stopIndex];
-        const pickup = window.currentPickups.find(p => 
-          p.customerAddress === stop.address
-        );
-        if (pickup) {
-          sortedPickups.push(pickup);
-        }
+        const pickup = window.currentPickups.find(p => p.customerAddress === stop.address);
+        if (pickup) sortedPickups.push(pickup);
       });
-      
-      // Add any pickups not in the route at the end
       window.currentPickups.forEach(pickup => {
-        if (!sortedPickups.find(p => p.id === pickup.id)) {
-          sortedPickups.push(pickup);
-        }
+        if (!sortedPickups.find(p => p.id === pickup.id)) sortedPickups.push(pickup);
       });
-      
-      // Update the global array
       window.currentPickups = sortedPickups;
-      
-      // Reload display
       await loadPickupRequests();
-      
-      // Show success message
       const container = document.getElementById('pickupRequests');
       const successMsg = document.createElement('div');
       successMsg.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4';
       successMsg.innerHTML = '✓ Pickup requests sorted to match your optimized route!';
       container.insertBefore(successMsg, container.firstChild);
       setTimeout(() => successMsg.remove(), 5000);
-      
-      console.log('Sorted order:', sortedPickups.map(p => p.customerName));
     }
 
-    // DELETE SELECTED PICKUPS
     window.deleteSelectedPickups = async function() {
       const count = window.selectedPickupIds.size;
-      if (!confirm(`Delete ${count} selected pickup${count > 1 ? 's' : ''}?`)) {
-        return;
-      }
-
+      if (!confirm(`Delete ${count} selected pickup${count > 1 ? 's' : ''}?`)) return;
       try {
-        // Import deleteDoc function
         const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-        
-        const deletePromises = Array.from(window.selectedPickupIds).map(pickupId =>
-          deleteDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId))
-        );
-
-        await Promise.all(deletePromises);
-        
+        await Promise.all(Array.from(window.selectedPickupIds).map(id =>
+          deleteDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', id))
+        ));
         window.selectedPickupIds.clear();
         alert(`✅ ${count} pickup${count > 1 ? 's' : ''} deleted successfully!`);
-        
-        // Clear cached pickups to force fresh reload
         window.currentPickups = [];
-        
         await loadPickupRequests();
         await loadDriverAvailability();
       } catch (error) {
-        console.error('Error deleting pickups:', error);
         alert('Error deleting pickups: ' + error.message);
       }
     };
 
     // UPDATE PICKUP STATUS
     window.updatePickupStatus = async function(pickupId, newStatus) {
-      const confirmMessages = {
-        'confirmed': 'Confirm this pickup request?',
-        'completed': 'Mark this pickup as completed?',
-        'cancelled': 'Decline this pickup request?'
-      };
-
-      if (!confirm(confirmMessages[newStatus])) {
-        return;
-      }
-
+      const confirmMessages = { 'confirmed': 'Confirm this pickup request?', 'completed': 'Mark this pickup as completed?', 'cancelled': 'Decline this pickup request?' };
+      if (!confirm(confirmMessages[newStatus])) return;
       try {
-        // Get pickup details before updating
-        const pickupDoc = await window.firestoreGetDoc(
-          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId)
-        );
+        const pickupDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId));
         const pickupData = pickupDoc.data();
-
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId),
-          { status: newStatus }
-        );
-        
-        // If confirming, send confirmation email to customer
-        if (newStatus === 'confirmed') {
-          await sendConfirmationEmail(pickupData);
-        }
-        
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId), { status: newStatus });
+        if (newStatus === 'confirmed') await sendConfirmationEmail(pickupData);
         alert('Pickup status updated!');
-        
-        // Clear cached pickups to force fresh reload
         window.currentPickups = [];
-        
         await loadPickupRequests();
       } catch (error) {
-        console.error('Error updating pickup status:', error);
         alert('Error updating status: ' + error.message);
       }
     };
 
-    // SEND "ON MY WAY" EMAIL MANUALLY
+    // SEND ON MY WAY EMAIL
     window.sendOnMyWayEmail = async function(pickupId) {
-      if (!confirm('Send "On My Way" email to this customer?')) {
-        return;
-      }
-
+      if (!confirm('Send "On My Way" email to this customer?')) return;
       try {
-        // Get pickup details
-        const pickupDoc = await window.firestoreGetDoc(
-          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId)
-        );
+        const pickupDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId));
         const pickupData = pickupDoc.data();
-
-        if (!pickupData) {
-          alert('Pickup not found');
-          return;
-        }
-
-        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-
-        // Send "On My Way" email
-        const emailParams = {
+        if (!pickupData) { alert('Pickup not found'); return; }
+        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        await emailjs.send('service_itfrzub', 'template_verify', {
           to_email: pickupData.customerEmail,
           to_name: pickupData.customerName,
           subject: 'On My Way - ' + window.currentUser.companyName,
           message: `Hi ${pickupData.customerName},\n\nI'm on my way to pick up your items!\n\nPickup Details:\n• Date: ${pickupDate}\n• Number of Boxes: ${pickupData.boxes || 'Not specified'}\n• Pickup Address: ${pickupData.customerAddress}\n\nI should arrive within 15-20 minutes.\n\nDriver: ${window.currentUser.companyName}\nContact: ${window.currentUser.phone}\n\nSee you soon!`,
           link: ''
-        };
-
-        await emailjs.send('service_itfrzub', 'template_verify', emailParams);
-        
+        });
         alert('✅ "On My Way" email sent to ' + pickupData.customerName + '!');
-        console.log('On My Way email sent successfully');
       } catch (error) {
-        console.error('Error sending On My Way email:', error);
         alert('Error sending email: ' + error.message);
       }
     };
@@ -893,137 +520,181 @@
     // SEND CONFIRMATION EMAIL TO CUSTOMER
     async function sendConfirmationEmail(pickupData) {
       try {
-        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-
-        const emailParams = {
+        const pickupDate = new Date((pickupData.pickupDate || pickupData.date) + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        await emailjs.send('service_itfrzub', 'template_verify', {
           to_email: pickupData.customerEmail,
           to_name: pickupData.customerName,
           subject: 'Pickup Confirmed - ' + window.currentUser.companyName,
           message: `Great news! Your pickup has been confirmed.\n\nPickup Details:\n• Date: ${pickupDate}\n• Number of Boxes: ${pickupData.boxes || 'Not specified'}\n• Pickup Address: ${pickupData.customerAddress}\n${pickupData.notes ? `• Your Notes: ${pickupData.notes}\n` : ''}\nDriver: ${window.currentUser.companyName}\nContact: ${window.currentUser.phone}\n\nWe'll notify you when we're on the way!`,
           link: ''
-        };
-
-        await emailjs.send('service_itfrzub', 'template_verify', emailParams);
-        console.log('Confirmation email sent to customer');
+        });
       } catch (error) {
         console.error('Error sending confirmation email:', error);
-        // Don't fail the whole operation if email fails
       }
     }
 
-    // NOTIFY NEXT CUSTOMER
-    async function notifyNextCustomer(completedPickupId) {
+    // ============================================================
+    // CUSTOMER LIST MANAGEMENT
+    // ============================================================
+
+    // SAVE CUSTOMER TO DRIVER'S CUSTOMER LIST
+    async function saveCustomerToDriverList(customerData, driverId) {
       try {
-        // Get the completed pickup details
-        const completedPickupDoc = await window.firestoreGetDocs(
-          window.firestoreQuery(
-            window.firestoreCollection(window.firestoreDb, 'pickupRequests'),
-            window.firestoreWhere('__name__', '==', completedPickupId)
-          )
+        const customersRef = window.firestoreCollection(window.firestoreDb, 'driverCustomers');
+        const q = window.firestoreQuery(customersRef,
+          window.firestoreWhere('driverId', '==', driverId),
+          window.firestoreWhere('customerEmail', '==', customerData.customerEmail)
         );
-        
-        let completedPickup = null;
-        completedPickupDoc.forEach(doc => {
-          completedPickup = doc.data();
-        });
+        const existing = await window.firestoreGetDocs(q);
+        if (existing.empty) {
+          await window.firestoreAddDoc(customersRef, {
+            driverId: driverId,
+            customerName: customerData.customerName,
+            customerEmail: customerData.customerEmail,
+            customerPhone: customerData.customerPhone,
+            customerAddress: customerData.customerAddress,
+            savedAt: new Date().toISOString()
+          });
+        }
+      } catch (error) {
+        console.error('Error saving customer to driver list:', error);
+      }
+    }
 
-        if (!completedPickup) return;
-
-        const pickupDate = completedPickup.pickupDate || completedPickup.date;
-
-        // Find next confirmed pickup for same driver on same date
+    // BACKFILL CUSTOMERS FROM EXISTING PICKUPS
+    async function backfillDriverCustomers() {
+      try {
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
-        const q = window.firestoreQuery(requestsRef,
-          window.firestoreWhere('driverId', '==', window.currentUser.driverId),
-          window.firestoreWhere('status', '==', 'confirmed')
-        );
-        const querySnapshot = await window.firestoreGetDocs(q);
-
-        // Filter for same date
-        let nextPickup = null;
-        querySnapshot.forEach((doc) => {
+        const q = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
+        const snapshot = await window.firestoreGetDocs(q);
+        for (const doc of snapshot.docs) {
           const pickup = doc.data();
-          const thisDate = pickup.pickupDate || pickup.date;
-          if (thisDate === pickupDate && doc.id !== completedPickupId) {
-            nextPickup = pickup;
+          if (pickup.customerEmail && pickup.customerEmail !== 'Unknown') {
+            await saveCustomerToDriverList(pickup, window.currentUser.driverId);
           }
-        });
+        }
+        console.log('Customer backfill complete');
+      } catch (error) {
+        console.error('Error backfilling customers:', error);
+      }
+    }
 
-        if (!nextPickup) {
-          console.log('No next pickup to notify');
+    // LOAD DRIVER CUSTOMER LIST
+    async function loadDriverCustomers() {
+      const container = document.getElementById('driverCustomerList');
+      if (!container) return;
+      container.innerHTML = '<p class="text-gray-500 text-sm">Loading customers...</p>';
+      try {
+        const customersRef = window.firestoreCollection(window.firestoreDb, 'driverCustomers');
+        const q = window.firestoreQuery(customersRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
+        const snapshot = await window.firestoreGetDocs(q);
+        if (snapshot.empty) {
+          container.innerHTML = '<p class="text-gray-500 text-center py-6">No customers saved yet.</p>';
+          const countEl = document.getElementById('customerCount');
+          if (countEl) countEl.textContent = '0';
           return;
         }
-
-        // Calculate estimated time (simple estimate: 15 minutes per stop)
-        const estimatedTime = '15-20 minutes';
-
-        // Send email using EmailJS
-        const templateParams = {
-          to_email: nextPickup.customerEmail,
-          customer_name: nextPickup.customerName,
-          driver_name: window.currentUser.name,
-          company_name: window.currentUser.companyName || 'Door to Door Delivery',
-          customer_address: nextPickup.customerAddress,
-          estimated_time: estimatedTime,
-          boxes: nextPickup.boxes || 'Not specified',
-          driver_phone: window.currentUser.phone
-        };
-
-        console.log('=== EMAIL NOTIFICATION DEBUG ===');
-        console.log('Sending email to:', nextPickup.customerEmail);
-        console.log('Customer name:', nextPickup.customerName);
-        console.log('Next pickup data:', nextPickup);
-        console.log('Template params:', templateParams);
-        
-        await emailjs.send(
-          'service_itfrzub',  // Gmail service ID
-          'template_kp2xdis', // Your template ID
-          templateParams
-        );
-
-        console.log('Email sent successfully to next customer!');
-        
+        const customers = [];
+        snapshot.forEach(doc => customers.push({ id: doc.id, ...doc.data() }));
+        customers.sort((a, b) => {
+          const lastA = a.customerName.trim().split(' ').pop().toLowerCase();
+          const lastB = b.customerName.trim().split(' ').pop().toLowerCase();
+          return lastA.localeCompare(lastB);
+        });
+        container.innerHTML = '';
+        customers.forEach(customer => {
+          const div = document.createElement('div');
+          div.className = 'flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-gray-200 rounded-lg p-3 gap-2';
+          div.innerHTML = `
+            <div class="flex-1 text-sm">
+              <p class="font-semibold text-gray-800">${customer.customerName}</p>
+              <p class="text-gray-600">${customer.customerEmail}</p>
+              <p class="text-gray-500 text-xs">${customer.customerPhone} · ${customer.customerAddress}</p>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="openEmailCustomerModal('${customer.id}', '${customer.customerName.replace(/'/g, "\\'")}', '${customer.customerEmail}')"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs">✉️ Email</button>
+              <button onclick="deleteDriverCustomer('${customer.id}')"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">🗑️ Delete</button>
+            </div>`;
+          container.appendChild(div);
+        });
+        const countEl = document.getElementById('customerCount');
+        if (countEl) countEl.textContent = customers.length;
       } catch (error) {
-        console.error('Error notifying next customer:', error);
-        // Don't show error to user - email is bonus feature
+        console.error('Error loading driver customers:', error);
+        container.innerHTML = '<p class="text-red-500">Error loading customers</p>';
       }
     }
+
+    // DELETE DRIVER CUSTOMER
+    window.deleteDriverCustomer = async function(customerId) {
+      if (!confirm('Remove this customer from your list?\n\nThis will not affect any existing bookings.')) return;
+      try {
+        const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+        await deleteDoc(window.firestoreDoc(window.firestoreDb, 'driverCustomers', customerId));
+        await loadDriverCustomers();
+      } catch (error) {
+        alert('Error deleting customer: ' + error.message);
+      }
+    };
+
+    // OPEN EMAIL CUSTOMER MODAL
+    window.openEmailCustomerModal = function(customerId, customerName, customerEmail) {
+      document.getElementById('emailCustomerName').textContent = customerName;
+      document.getElementById('emailCustomerTo').value = customerEmail;
+      document.getElementById('emailCustomerSubject').value = '';
+      document.getElementById('emailCustomerMessage').value = '';
+      document.getElementById('emailCustomerModal').classList.remove('hidden');
+    };
+
+    window.hideEmailCustomerModal = function() {
+      document.getElementById('emailCustomerModal').classList.add('hidden');
+    };
+
+    // SEND EMAIL TO CUSTOMER
+    window.sendEmailToCustomer = async function() {
+      const toEmail = document.getElementById('emailCustomerTo').value;
+      const subject = document.getElementById('emailCustomerSubject').value.trim();
+      const message = document.getElementById('emailCustomerMessage').value.trim();
+      const customerName = document.getElementById('emailCustomerName').textContent;
+      if (!subject || !message) { alert('Please fill in both subject and message.'); return; }
+      try {
+        await emailjs.send('service_itfrzub', 'template_verify', {
+          to_email: toEmail,
+          user_name: customerName,
+          subject: subject,
+          message: message,
+          link: ''
+        });
+        alert(`✅ Email sent to ${customerName}!`);
+        window.hideEmailCustomerModal();
+      } catch (error) {
+        alert('Error sending email: ' + error.message);
+      }
+    };
+
+    // ============================================================
+    // END CUSTOMER LIST MANAGEMENT
+    // ============================================================
 
     // DELETE PICKUP
     window.deletePickup = async function(pickupId) {
-      if (!confirm('Are you sure you want to permanently delete this completed pickup?\n\nThis cannot be undone.')) {
-        return;
-      }
-
+      if (!confirm('Are you sure you want to permanently delete this pickup?\n\nThis cannot be undone.')) return;
       try {
-        // Import deleteDoc function
         const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-        
         await deleteDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId));
-        
         alert('Pickup deleted successfully!');
-        
-        // Clear cached pickups to force fresh reload
         window.currentPickups = [];
-        
         await loadPickupRequests();
-        
-        // Also refresh availability to update capacity counts
         await loadDriverAvailability();
       } catch (error) {
-        console.error('Error deleting pickup:', error);
         alert('Error deleting pickup: ' + error.message);
       }
     };
 
     // SHOW EDIT PROFILE MODAL
     window.showEditProfile = function() {
-      // Populate form with current user data
       document.getElementById('editName').value = window.currentUser.name;
       document.getElementById('editEmail').value = window.currentUser.email;
       document.getElementById('editPhone').value = window.currentUser.phone;
@@ -1033,20 +704,13 @@
       document.getElementById('editCity').value = window.currentUser.city;
       document.getElementById('editState').value = window.currentUser.state;
       document.getElementById('editZipCode').value = window.currentUser.zipCode;
-      
-      // Show modal
       document.getElementById('editProfileModal').classList.remove('hidden');
     };
 
-    // HIDE EDIT PROFILE MODAL
-    window.hideEditProfile = function() {
-      document.getElementById('editProfileModal').classList.add('hidden');
-    };
+    window.hideEditProfile = function() { document.getElementById('editProfileModal').classList.add('hidden'); };
 
-    // SAVE PROFILE CHANGES
     document.getElementById('editProfileForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const updatedData = {
         name: document.getElementById('editName').value,
         email: document.getElementById('editEmail').value,
@@ -1058,33 +722,18 @@
         state: document.getElementById('editState').value,
         zipCode: document.getElementById('editZipCode').value
       };
-
       try {
-        // Update in Firestore
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id),
-          updatedData
-        );
-
-        // Update current user object
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id), updatedData);
         window.currentUser = { ...window.currentUser, ...updatedData };
-
         alert('Profile updated successfully!');
-        
-        // Hide modal
         window.hideEditProfile();
-        
-        // Reload dashboard to show new info
         await loadDriverDashboard();
       } catch (error) {
-        console.error('Error updating profile:', error);
         alert('Error updating profile: ' + error.message);
       }
     });
 
-    // SHOW CUSTOMER EDIT PROFILE MODAL
     window.showCustomerEditProfile = function() {
-      // Populate form with current user data
       document.getElementById('editCustomerName').value = window.currentUser.name;
       document.getElementById('editCustomerEmail').value = window.currentUser.email;
       document.getElementById('editCustomerPhone').value = window.currentUser.phone;
@@ -1092,20 +741,13 @@
       document.getElementById('editCustomerCity').value = window.currentUser.city;
       document.getElementById('editCustomerState').value = window.currentUser.state;
       document.getElementById('editCustomerZipCode').value = window.currentUser.zipCode;
-      
-      // Show modal
       document.getElementById('editCustomerProfileModal').classList.remove('hidden');
     };
 
-    // HIDE CUSTOMER EDIT PROFILE MODAL
-    window.hideCustomerEditProfile = function() {
-      document.getElementById('editCustomerProfileModal').classList.add('hidden');
-    };
+    window.hideCustomerEditProfile = function() { document.getElementById('editCustomerProfileModal').classList.add('hidden'); };
 
-    // SAVE CUSTOMER PROFILE CHANGES
     document.getElementById('editCustomerProfileForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const updatedData = {
         name: document.getElementById('editCustomerName').value,
         email: document.getElementById('editCustomerEmail').value,
@@ -1115,26 +757,13 @@
         state: document.getElementById('editCustomerState').value,
         zipCode: document.getElementById('editCustomerZipCode').value
       };
-
       try {
-        // Update in Firestore
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id),
-          updatedData
-        );
-
-        // Update current user object
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id), updatedData);
         window.currentUser = { ...window.currentUser, ...updatedData };
-
         alert('Profile updated successfully!');
-        
-        // Hide modal
         window.hideCustomerEditProfile();
-        
-        // Reload dashboard to show new info
         await loadCustomerDashboard();
       } catch (error) {
-        console.error('Error updating profile:', error);
         alert('Error updating profile: ' + error.message);
       }
     });
@@ -1142,18 +771,13 @@
     // LOAD CUSTOMER DASHBOARD
     async function loadCustomerDashboard() {
       window.showView('customerDashboard');
-      
       document.getElementById('customerName').textContent = window.currentUser.name;
       document.getElementById('customerInfoName').textContent = window.currentUser.name;
       document.getElementById('customerInfoEmail').textContent = window.currentUser.email;
       document.getElementById('customerInfoPhone').textContent = window.currentUser.phone;
-      document.getElementById('customerInfoAddress').textContent = 
+      document.getElementById('customerInfoAddress').textContent =
         `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`;
-      
-      // Load customer's pickups
       await loadCustomerPickups();
-      
-      // Load saved drivers
       await loadSavedDrivers();
     }
 
@@ -1161,31 +785,20 @@
     async function loadSavedDrivers() {
       const container = document.getElementById('savedDriversList');
       container.innerHTML = '<p class="text-gray-500 text-sm">Loading your drivers...</p>';
-
       try {
         const savedDriverIds = window.currentUser.savedDrivers || [];
-        
         if (savedDriverIds.length === 0) {
           container.innerHTML = '<p class="text-gray-500 text-center py-8">No saved drivers yet. Add a driver using their unique code above.</p>';
           return;
         }
-
         container.innerHTML = '';
-
-        // Load each driver's info
         for (const driverId of savedDriverIds) {
           const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
           const q = window.firestoreQuery(usersRef, window.firestoreWhere('driverId', '==', driverId));
           const querySnapshot = await window.firestoreGetDocs(q);
-          
-          if (querySnapshot.empty) continue; // Skip if driver not found
-
+          if (querySnapshot.empty) continue;
           let driver = null;
-          querySnapshot.forEach((doc) => {
-            driver = { id: doc.id, ...doc.data() };
-          });
-
-          // Create driver card
+          querySnapshot.forEach((doc) => { driver = { id: doc.id, ...doc.data() }; });
           const driverCard = document.createElement('div');
           driverCard.className = 'border-2 border-indigo-200 rounded-lg p-4 bg-indigo-50';
           driverCard.innerHTML = `
@@ -1195,181 +808,99 @@
                 ${driver.companyName ? `<p class="text-sm text-gray-600">${driver.companyName}</p>` : ''}
                 <p class="text-xs text-gray-500 mt-1">Code: ${driver.driverId}</p>
               </div>
-              <button 
-                onclick="removeSavedDriver('${driver.driverId}')"
-                class="text-red-500 hover:text-red-700 text-sm"
-              >
-                ✕ Remove
-              </button>
+              <button onclick="removeSavedDriver('${driver.driverId}')" class="text-red-500 hover:text-red-700 text-sm">✕ Remove</button>
             </div>
-            ${driver.pricingNotes ? `
-              <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3 rounded">
-                <p class="text-xs font-semibold text-gray-700 mb-1">💰 Pricing & Notes:</p>
-                <p class="text-sm text-gray-700 whitespace-pre-line">${driver.pricingNotes}</p>
-              </div>
-            ` : ''}
-            <div id="driver-${driver.driverId}-dates" class="mt-3"></div>
-          `;
+            ${driver.pricingNotes ? `<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3 rounded"><p class="text-xs font-semibold text-gray-700 mb-1">💰 Pricing & Notes:</p><p class="text-sm text-gray-700 whitespace-pre-line">${driver.pricingNotes}</p></div>` : ''}
+            <div id="driver-${driver.driverId}-dates" class="mt-3"></div>`;
           container.appendChild(driverCard);
-
-          // Load this driver's available dates
           await loadDriverAvailableDatesInCard(driver.driverId, `driver-${driver.driverId}-dates`);
         }
       } catch (error) {
-        console.error('Error loading saved drivers:', error);
         container.innerHTML = '<p class="text-red-500">Error loading drivers</p>';
       }
     }
 
-    // LOAD DRIVER AVAILABLE DATES IN CARD
     async function loadDriverAvailableDatesInCard(driverId, containerId) {
       const container = document.getElementById(containerId);
       container.innerHTML = '<p class="text-xs text-gray-500">Loading availability...</p>';
-
       try {
         const availRef = window.firestoreCollection(window.firestoreDb, 'availability');
-        const q = window.firestoreQuery(availRef, 
+        const q = window.firestoreQuery(availRef,
           window.firestoreWhere('driverId', '==', driverId),
           window.firestoreWhere('available', '==', true)
         );
         const querySnapshot = await window.firestoreGetDocs(q);
-        
-        if (querySnapshot.empty) {
-          container.innerHTML = '<p class="text-xs text-gray-500">No available dates</p>';
-          return;
-        }
-
-        // Get current bookings to calculate remaining capacity
+        if (querySnapshot.empty) { container.innerHTML = '<p class="text-xs text-gray-500">No available dates</p>'; return; }
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
         const requestsQuery = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', driverId));
         const requestsSnapshot = await window.firestoreGetDocs(requestsQuery);
-        
         const bookings = {};
         requestsSnapshot.forEach((doc) => {
           const data = doc.data();
           const dateKey = data.pickupDate || data.date;
-          if (data.status !== 'cancelled') {
-            bookings[dateKey] = (bookings[dateKey] || 0) + (data.boxes || 0);
-          }
+          if (data.status !== 'cancelled') { bookings[dateKey] = (bookings[dateKey] || 0) + (data.boxes || 0); }
         });
-
         const datesDiv = document.createElement('div');
         datesDiv.className = 'space-y-2 max-h-48 overflow-y-auto';
-
-        // Get today's date at midnight for comparison
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayString = today.toISOString().split('T')[0];
-
         let hasAvailableDates = false;
-
         querySnapshot.forEach((doc) => {
           const dateData = doc.data();
           const date = dateData.date;
-          
-          // Skip past dates - only show today and future
-          if (date < todayString) {
-            return; // Skip this date
-          }
-
+          if (date < todayString) return;
           hasAvailableDates = true;
-          
           const capacity = dateData.capacity || 0;
           const booked = bookings[date] || 0;
           const remaining = capacity - booked;
-          
           const isFull = remaining <= 0;
-          
           const dateDiv = document.createElement('div');
           dateDiv.className = 'bg-white border border-gray-200 rounded p-2 text-sm flex justify-between items-center';
           dateDiv.innerHTML = `
             <div class="flex-1">
-              <span class="font-medium text-gray-700">
-                ${new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </span>
-              <span class="text-xs ${isFull ? 'text-red-600' : 'text-gray-500'} ml-2">
-                ${remaining}/${capacity} boxes
-              </span>
+              <span class="font-medium text-gray-700">${new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+              <span class="text-xs ${isFull ? 'text-red-600' : 'text-gray-500'} ml-2">${remaining}/${capacity} boxes</span>
             </div>
-            <button 
-              onclick="schedulePickupWithBoxes('${driverId}', '${date}', ${remaining})"
+            <button onclick="schedulePickupWithBoxes('${driverId}', '${date}', ${remaining})"
               class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs ${isFull ? 'opacity-50 cursor-not-allowed' : ''}"
-              ${isFull ? 'disabled' : ''}
-            >
-              ${isFull ? 'Full' : 'Book'}
-            </button>
-          `;
+              ${isFull ? 'disabled' : ''}>${isFull ? 'Full' : 'Book'}</button>`;
           datesDiv.appendChild(dateDiv);
         });
-
-        if (!hasAvailableDates) {
-          container.innerHTML = '<p class="text-xs text-gray-500">No upcoming available dates</p>';
-          return;
-        }
-
+        if (!hasAvailableDates) { container.innerHTML = '<p class="text-xs text-gray-500">No upcoming available dates</p>'; return; }
         container.innerHTML = '';
         container.appendChild(datesDiv);
       } catch (error) {
-        console.error('Error loading dates:', error);
         container.innerHTML = '<p class="text-xs text-red-500">Error loading dates</p>';
       }
     }
 
-    // REMOVE SAVED DRIVER
     window.removeSavedDriver = async function(driverId) {
-      if (!confirm('Remove this driver from your saved list?')) {
-        return;
-      }
-
+      if (!confirm('Remove this driver from your saved list?')) return;
       try {
-        const currentSavedDrivers = window.currentUser.savedDrivers || [];
-        const updatedDrivers = currentSavedDrivers.filter(id => id !== driverId);
-        
-        // Update in Firestore
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id),
-          { savedDrivers: updatedDrivers }
-        );
-        
-        // Update local user object
+        const updatedDrivers = (window.currentUser.savedDrivers || []).filter(id => id !== driverId);
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id), { savedDrivers: updatedDrivers });
         window.currentUser.savedDrivers = updatedDrivers;
-        
-        // Refresh display
         await loadSavedDrivers();
       } catch (error) {
-        console.error('Error removing driver:', error);
         alert('Error removing driver: ' + error.message);
       }
     };
 
-    // LOAD CUSTOMER PICKUPS
     async function loadCustomerPickups() {
       const container = document.getElementById('customerPickups');
       container.innerHTML = '<p class="text-gray-500 text-sm">Loading your pickups...</p>';
-
       try {
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
         const q = window.firestoreQuery(requestsRef, window.firestoreWhere('customerId', '==', window.currentUser.id));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
-        if (querySnapshot.empty) {
-          container.innerHTML = '<p class="text-gray-500 text-center py-8">No scheduled pickups yet</p>';
-          return;
-        }
-
+        if (querySnapshot.empty) { container.innerHTML = '<p class="text-gray-500 text-center py-8">No scheduled pickups yet</p>'; return; }
         container.innerHTML = '';
         querySnapshot.forEach((doc) => {
           const pickup = doc.data();
+          const statusColor = { 'pending': 'bg-yellow-100 text-yellow-800', 'confirmed': 'bg-green-100 text-green-800', 'completed': 'bg-blue-100 text-blue-800', 'cancelled': 'bg-red-100 text-red-800' }[pickup.status] || 'bg-gray-100 text-gray-800';
           const pickupDiv = document.createElement('div');
           pickupDiv.className = 'bg-indigo-50 border border-indigo-200 rounded-lg p-4';
-          
-          const statusColor = {
-            'pending': 'bg-yellow-100 text-yellow-800',
-            'confirmed': 'bg-green-100 text-green-800',
-            'completed': 'bg-blue-100 text-blue-800',
-            'cancelled': 'bg-red-100 text-red-800'
-          }[pickup.status] || 'bg-gray-100 text-gray-800';
-          
           pickupDiv.innerHTML = `
             <div class="flex justify-between items-start mb-3">
               <div>
@@ -1377,218 +908,71 @@
                 <p class="text-sm text-gray-600">Pickup Date: ${new Date((pickup.pickupDate || pickup.date) + 'T00:00:00').toLocaleDateString()}</p>
                 <p class="text-sm text-gray-600">Boxes: ${pickup.boxes || 'Not specified'}</p>
               </div>
-              <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">
-                ${pickup.status.toUpperCase()}
-              </span>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">${pickup.status.toUpperCase()}</span>
             </div>
             <div class="space-y-2">
-              ${pickup.status !== 'cancelled' && pickup.status !== 'completed' ? `
-                <button 
-                  onclick="cancelPickup('${doc.id}')"
-                  class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition"
-                >
-                  Cancel Pickup
-                </button>
-              ` : ''}
-              ${pickup.status === 'cancelled' || pickup.status === 'completed' ? `
-                <button 
-                  onclick="deleteCustomerPickup('${doc.id}')"
-                  class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition"
-                >
-                  Delete from List
-                </button>
-              ` : ''}
-            </div>
-          `;
+              ${pickup.status !== 'cancelled' && pickup.status !== 'completed' ? `<button onclick="cancelPickup('${doc.id}')" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition">Cancel Pickup</button>` : ''}
+              ${pickup.status === 'cancelled' || pickup.status === 'completed' ? `<button onclick="deleteCustomerPickup('${doc.id}')" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition">Delete from List</button>` : ''}
+            </div>`;
           container.appendChild(pickupDiv);
         });
       } catch (error) {
-        console.error('Error loading customer pickups:', error);
         container.innerHTML = '<p class="text-red-500">Error loading pickups</p>';
       }
     }
 
-    // CANCEL PICKUP
     window.cancelPickup = async function(pickupId) {
-      if (!confirm('Are you sure you want to cancel this pickup?')) {
-        return;
-      }
-
+      if (!confirm('Are you sure you want to cancel this pickup?')) return;
       try {
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId),
-          { status: 'cancelled' }
-        );
-        
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId), { status: 'cancelled' });
         alert('Pickup cancelled successfully!');
         await loadCustomerPickups();
       } catch (error) {
-        console.error('Error cancelling pickup:', error);
         alert('Error cancelling pickup: ' + error.message);
       }
     };
 
-    // DELETE CUSTOMER PICKUP
     window.deleteCustomerPickup = async function(pickupId) {
-      if (!confirm('Are you sure you want to permanently delete this pickup from your list?\n\nThis cannot be undone.')) {
-        return;
-      }
-
+      if (!confirm('Are you sure you want to permanently delete this pickup?\n\nThis cannot be undone.')) return;
       try {
-        // Import deleteDoc function
         const { deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-        
         await deleteDoc(window.firestoreDoc(window.firestoreDb, 'pickupRequests', pickupId));
-        
         alert('Pickup deleted successfully!');
         await loadCustomerPickups();
       } catch (error) {
-        console.error('Error deleting pickup:', error);
         alert('Error deleting pickup: ' + error.message);
       }
     };
 
-    // SEARCH DRIVER BY CODE
     window.searchDriver = async function() {
       const driverCode = document.getElementById('driverCode').value.toUpperCase();
-      
-      if (!driverCode) {
-        alert('Please enter a driver code!');
-        return;
-      }
-
+      if (!driverCode) { alert('Please enter a driver code!'); return; }
       try {
         const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
         const q = window.firestoreQuery(usersRef, window.firestoreWhere('driverId', '==', driverCode));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
         if (querySnapshot.empty) {
-          document.getElementById('driverStatus').innerHTML = 
-            '<p class="text-red-600 text-sm mt-2">Invalid driver code</p>';
-          document.getElementById('availableDatesContainer').innerHTML = '';
+          document.getElementById('driverStatus').innerHTML = '<p class="text-red-600 text-sm mt-2">Invalid driver code</p>';
           return;
         }
-
         let driver = null;
-        querySnapshot.forEach((doc) => {
-          driver = { id: doc.id, ...doc.data() };
-        });
-
-        // Save driver to customer's saved drivers list
+        querySnapshot.forEach((doc) => { driver = { id: doc.id, ...doc.data() }; });
         const currentSavedDrivers = window.currentUser.savedDrivers || [];
         if (!currentSavedDrivers.includes(driverCode)) {
           currentSavedDrivers.push(driverCode);
-          
-          // Update in Firestore
-          await window.firestoreUpdateDoc(
-            window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id),
-            { savedDrivers: currentSavedDrivers }
-          );
-          
-          // Update local user object
+          await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', window.currentUser.id), { savedDrivers: currentSavedDrivers });
           window.currentUser.savedDrivers = currentSavedDrivers;
-          
-          // Refresh saved drivers display
           await loadSavedDrivers();
         }
-
-        document.getElementById('driverStatus').innerHTML = 
-          `<p class="text-green-600 text-sm mt-2">✓ Connected to driver: ${driver.name}${driver.companyName ? ' (' + driver.companyName + ')' : ''}</p>`;
-
-        // Clear the input
+        document.getElementById('driverStatus').innerHTML = `<p class="text-green-600 text-sm mt-2">✓ Connected to driver: ${driver.name}${driver.companyName ? ' (' + driver.companyName + ')' : ''}</p>`;
         document.getElementById('driverCode').value = '';
       } catch (error) {
-        console.error('Error searching driver:', error);
         alert('Error searching driver');
       }
     };
 
-    // LOAD DRIVER AVAILABLE DATES
-    async function loadDriverAvailableDates(driverId) {
-      const container = document.getElementById('availableDatesContainer');
-      container.innerHTML = '<h3 class="font-semibold text-gray-800 mb-3">Available Pickup Dates</h3>';
-
-      try {
-        const availRef = window.firestoreCollection(window.firestoreDb, 'availability');
-        const q = window.firestoreQuery(availRef, 
-          window.firestoreWhere('driverId', '==', driverId),
-          window.firestoreWhere('available', '==', true)
-        );
-        const querySnapshot = await window.firestoreGetDocs(q);
-        
-        if (querySnapshot.empty) {
-          container.innerHTML += '<p class="text-gray-500 text-center py-8">No available dates from this driver</p>';
-          return;
-        }
-
-        // Get current bookings to calculate remaining capacity
-        const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
-        const requestsQuery = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', driverId));
-        const requestsSnapshot = await window.firestoreGetDocs(requestsQuery);
-        
-        const bookings = {};
-        requestsSnapshot.forEach((doc) => {
-          const data = doc.data();
-          const dateKey = data.pickupDate || data.date;
-          if (data.status !== 'cancelled') {
-            bookings[dateKey] = (bookings[dateKey] || 0) + (data.boxes || 0);
-          }
-        });
-
-        console.log('Bookings by date:', bookings);
-
-        const datesDiv = document.createElement('div');
-        datesDiv.className = 'space-y-2 max-h-64 overflow-y-auto';
-
-        querySnapshot.forEach((doc) => {
-          const dateData = doc.data();
-          const date = dateData.date;
-          const capacity = dateData.capacity || 0;
-          const booked = bookings[date] || 0;
-          const remaining = capacity - booked;
-          
-          console.log(`Date ${date}: capacity=${capacity}, booked=${booked}, remaining=${remaining}`);
-          
-          const isFull = remaining <= 0;
-          
-          const dateDiv = document.createElement('div');
-          dateDiv.className = `bg-indigo-50 border border-indigo-200 rounded-lg p-3 ${isFull ? 'opacity-50' : ''}`;
-          dateDiv.innerHTML = `
-            <div class="flex justify-between items-center mb-2">
-              <div class="flex-1">
-                <span class="font-medium text-gray-700">
-                  ${new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
-                <div class="text-xs ${isFull ? 'text-red-600' : 'text-gray-600'}">
-                  ${isFull ? 'FULL - ' : ''}${remaining} of ${capacity} boxes available
-                </div>
-              </div>
-              <button 
-                onclick="schedulePickupWithBoxes('${driverId}', '${date}', ${remaining})"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1 rounded-lg text-sm transition ${isFull ? 'opacity-50 cursor-not-allowed' : ''}"
-                ${isFull ? 'disabled' : ''}
-              >
-                ${isFull ? 'Full' : 'Schedule'}
-              </button>
-            </div>
-          `;
-          datesDiv.appendChild(dateDiv);
-        });
-
-        container.appendChild(datesDiv);
-      } catch (error) {
-        console.error('Error loading dates:', error);
-      }
-    }
-
-    // SCHEDULE PICKUP WITH BOXES
     window.schedulePickupWithBoxes = async function(driverId, date, remainingCapacity) {
-      if (remainingCapacity <= 0) {
-        alert('This date is full. Please choose another date.');
-        return;
-      }
-
-      // Show booking modal instead of prompt
+      if (remainingCapacity <= 0) { alert('This date is full. Please choose another date.'); return; }
       document.getElementById('bookingDriverId').value = driverId;
       document.getElementById('bookingDate').value = date;
       document.getElementById('bookingCapacity').value = remainingCapacity;
@@ -1598,104 +982,32 @@
       document.getElementById('bookingModal').classList.remove('hidden');
     };
 
-    // HIDE BOOKING MODAL
-    window.hideBookingModal = function() {
-      document.getElementById('bookingModal').classList.add('hidden');
-    };
+    window.hideBookingModal = function() { document.getElementById('bookingModal').classList.add('hidden'); };
 
     // HANDLE BOOKING FORM SUBMISSION
     document.getElementById('bookingForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const driverId = document.getElementById('bookingDriverId').value;
       const date = document.getElementById('bookingDate').value;
       const remainingCapacity = parseInt(document.getElementById('bookingCapacity').value);
       const boxes = parseInt(document.getElementById('bookingBoxes').value);
       const notes = document.getElementById('bookingNotes').value.trim();
 
-      // Validate capacity
       if (boxes > remainingCapacity) {
         alert(`Sorry, only ${remainingCapacity} boxes available on this date.\n\nPlease choose a different date or reduce the number of boxes.`);
         return;
       }
 
       try {
-        // Get driver info
         const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
         const q = window.firestoreQuery(usersRef, window.firestoreWhere('driverId', '==', driverId));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
         let driver = null;
-        querySnapshot.forEach((doc) => {
-          driver = { id: doc.id, ...doc.data() };
-        });
+        querySnapshot.forEach((doc) => { driver = { id: doc.id, ...doc.data() }; });
 
-       // Create pickup request with boxes and notes
-await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), {
-  customerId: window.currentUser.id,
-  customerName: window.currentUser.name,
-  customerEmail: window.currentUser.email,
-  customerPhone: window.currentUser.phone,
-  customerAddress: `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`,
-  driverId: driverId,
-  driverName: driver.name,
-  pickupDate: date,
-  boxes: boxes,
-  notes: notes || null,
-  status: 'pending',
-  createdAt: new Date().toISOString()
-});
+        if (!driver) { alert('Error: Could not find driver information. Please try again.'); return; }
 
-// 🔔 Notify driver by email
-try {
-  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  });
-
-  await emailjs.send(
-    'service_itfrzub',
-    'template_verify',        // reuse your existing template
-    {
-      to_email: driver.email,
-      user_name: driver.name,
-      subject: '📦 New Pickup Booking - Action Required',
-      message: `You have a new pickup request!\n\nCustomer: ${window.currentUser.name}\nPhone: ${window.currentUser.phone}\nEmail: ${window.currentUser.email}\nAddress: ${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}\nDate: ${formattedDate}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}\n\nPlease log in to confirm or decline this pickup.`,
-      link: window.location.origin + '/app.html'
-    }
-  );
-  console.log('Driver notified by email');
-} catch (emailError) {
-  console.error('Driver email failed:', emailError);
-  // Don't block the booking if email fails
-}
-
-alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDateString()}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}`);
-        
-        // Hide modal
-        window.hideBookingModal();
-        
-        // Refresh saved drivers to show updated capacity
-        await loadSavedDrivers();
-      } catch (error) {
-        console.error('Error scheduling pickup:', error);
-        alert('Error scheduling pickup: ' + error.message);
-      }
-    });
-
-    // SCHEDULE PICKUP (keep old function for backward compatibility)
-    window.schedulePickup = async function(driverId, date) {
-      try {
-        // Get driver info
-        const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
-        const q = window.firestoreQuery(usersRef, window.firestoreWhere('driverId', '==', driverId));
-        const querySnapshot = await window.firestoreGetDocs(q);
-        
-        let driver = null;
-        querySnapshot.forEach((doc) => {
-          driver = { id: doc.id, ...doc.data() };
-        });
-
-        // Create pickup request
+        // Save pickup request
         await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), {
           customerId: window.currentUser.id,
           customerName: window.currentUser.name,
@@ -1705,13 +1017,60 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
           driverId: driverId,
           driverName: driver.name,
           pickupDate: date,
+          boxes: boxes,
+          notes: notes || null,
           status: 'pending',
           createdAt: new Date().toISOString()
         });
 
+        // Save customer to driver's customer list
+        await saveCustomerToDriverList({
+          customerName: window.currentUser.name,
+          customerEmail: window.currentUser.email,
+          customerPhone: window.currentUser.phone,
+          customerAddress: `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`
+        }, driverId);
+
+        // Notify driver by email
+        try {
+          const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+          await emailjs.send('service_itfrzub', 'template_verify', {
+            to_email: driver.email,
+            user_name: driver.name,
+            subject: '📦 New Pickup Booking - Action Required',
+            message: `You have a new pickup request!\n\nCustomer: ${window.currentUser.name}\nPhone: ${window.currentUser.phone}\nEmail: ${window.currentUser.email}\nAddress: ${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}\nDate: ${formattedDate}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}\n\nPlease log in to confirm or decline this pickup.`,
+            link: window.location.origin + '/app.html'
+          });
+        } catch (emailError) {
+          console.error('Driver email failed:', emailError);
+        }
+
+        alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDateString()}\nBoxes: ${boxes}${notes ? '\nNotes: ' + notes : ''}`);
+        window.hideBookingModal();
+        await loadSavedDrivers();
+      } catch (error) {
+        alert('Error scheduling pickup: ' + error.message);
+      }
+    });
+
+    // SCHEDULE PICKUP (backward compatibility)
+    window.schedulePickup = async function(driverId, date) {
+      try {
+        const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
+        const q = window.firestoreQuery(usersRef, window.firestoreWhere('driverId', '==', driverId));
+        const querySnapshot = await window.firestoreGetDocs(q);
+        let driver = null;
+        querySnapshot.forEach((doc) => { driver = { id: doc.id, ...doc.data() }; });
+        await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), {
+          customerId: window.currentUser.id,
+          customerName: window.currentUser.name,
+          customerEmail: window.currentUser.email,
+          customerPhone: window.currentUser.phone,
+          customerAddress: `${window.currentUser.street}, ${window.currentUser.city}, ${window.currentUser.state} ${window.currentUser.zipCode}`,
+          driverId, driverName: driver.name, pickupDate: date, status: 'pending', createdAt: new Date().toISOString()
+        });
         alert(`✅ Pickup scheduled for ${new Date(date).toLocaleDateString()}!`);
       } catch (error) {
-        console.error('Error scheduling pickup:', error);
         alert('Error scheduling pickup');
       }
     };
@@ -1719,34 +1078,13 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
     // CREATE ROUTE
     window.createRoute = async function() {
       const dateInput = document.getElementById('routeDate').value;
-      
-      console.log('=== CREATE ROUTE DEBUG ===');
-      console.log('Selected date:', dateInput);
-      
-      if (!dateInput) {
-        alert('Please select a date for the route!');
-        return;
-      }
-
-      // Request location permission
-      if (!navigator.geolocation) {
-        alert('Geolocation is not supported by your browser. Using first pickup as starting point.');
-        await createRouteWithoutLocation(dateInput);
-        return;
-      }
-
-      // Get current location
+      if (!dateInput) { alert('Please select a date for the route!'); return; }
+      if (!navigator.geolocation) { await createRouteWithoutLocation(dateInput); return; }
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          const currentLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          console.log('Driver location:', currentLocation);
-          await createRouteFromLocation(dateInput, currentLocation);
+          await createRouteFromLocation(dateInput, { lat: position.coords.latitude, lng: position.coords.longitude });
         },
         (error) => {
-          console.error('Location error:', error);
           if (confirm('Could not get your location. Use first pickup address as starting point instead?')) {
             createRouteWithoutLocation(dateInput);
           }
@@ -1755,281 +1093,117 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
       );
     };
 
-    // CREATE ROUTE FROM CURRENT LOCATION
     async function createRouteFromLocation(dateInput, currentLocation) {
-
       try {
-        // Get ALL pickups for this driver first to see what we have
         const requestsRef = window.firestoreCollection(window.firestoreDb, 'pickupRequests');
-        const allQuery = window.firestoreQuery(requestsRef, 
-          window.firestoreWhere('driverId', '==', window.currentUser.driverId)
-        );
+        const allQuery = window.firestoreQuery(requestsRef, window.firestoreWhere('driverId', '==', window.currentUser.driverId));
         const allSnapshot = await window.firestoreGetDocs(allQuery);
-        
-        console.log('Total pickups for driver:', allSnapshot.size);
-        
-        // Filter by date manually since Firebase date comparison can be tricky
         const stops = [];
         allSnapshot.forEach((doc) => {
           const pickup = doc.data();
-          // Support both old 'date' field and new 'pickupDate' field
           const pickupDateValue = pickup.pickupDate || pickup.date;
-          
-          console.log('Pickup:', {
-            date: pickupDateValue,
-            status: pickup.status,
-            customer: pickup.customerName,
-            manualEntry: pickup.manualEntry || false
-          });
-          
-          // Compare dates as strings (format: YYYY-MM-DD)
           if (pickupDateValue === dateInput && pickup.status === 'confirmed') {
-            stops.push({
-              id: doc.id,
-              address: pickup.customerAddress,
-              customerName: pickup.customerName,
-              customerPhone: pickup.customerPhone
-            });
-          } else {
-            // Debug why it didn't match
-            console.log('  → Skipped because:', {
-              dateMatch: pickupDateValue === dateInput,
-              pickupDate: pickupDateValue,
-              selectedDate: dateInput,
-              statusMatch: pickup.status === 'confirmed',
-              actualStatus: pickup.status
-            });
+            stops.push({ id: doc.id, address: pickup.customerAddress, customerName: pickup.customerName, customerPhone: pickup.customerPhone });
           }
         });
-        
-        console.log('Confirmed pickups for', dateInput, ':', stops.length);
-        console.log('Stops:', stops);
-        
         if (stops.length === 0) {
           document.getElementById('noPickups').classList.remove('hidden');
           document.getElementById('mapContainer').classList.add('hidden');
           document.getElementById('routeInfo').classList.add('hidden');
-          alert('No confirmed pickups found for ' + dateInput + '\n\nMake sure:\n1. Pickups are confirmed (not pending)\n2. Date matches exactly');
+          alert('No confirmed pickups found for ' + dateInput);
           return;
         }
-
-        // Hide no pickups message
         document.getElementById('noPickups').classList.add('hidden');
-        
-        console.log('Creating route for', stops.length, 'stops');
-        
-        // Show map and route info
         document.getElementById('mapContainer').classList.remove('hidden');
         document.getElementById('routeInfo').classList.remove('hidden');
         document.getElementById('totalStops').textContent = stops.length;
-
-        // Initialize map
-        const map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 10,
-          center: { lat: 14.5995, lng: 120.9842 } // Manila, Philippines default
-        });
-
-        // If only 1 stop, just show it on the map
+        const map = new google.maps.Map(document.getElementById('map'), { zoom: 10, center: { lat: 14.5995, lng: 120.9842 } });
         if (stops.length === 1) {
           const geocoder = new google.maps.Geocoder();
           geocoder.geocode({ address: stops[0].address }, function(results, status) {
             if (status === 'OK') {
               map.setCenter(results[0].geometry.location);
-              new google.maps.Marker({
-                map: map,
-                position: results[0].geometry.location,
-                title: stops[0].customerName
-              });
-              
+              new google.maps.Marker({ map, position: results[0].geometry.location, title: stops[0].customerName });
               document.getElementById('totalDistance').textContent = 'Single stop';
               document.getElementById('totalDuration').textContent = 'N/A';
-              
-              const directionsDiv = document.getElementById('directions');
-              directionsDiv.innerHTML = `
-                <h3 class="font-bold text-gray-800 mb-3">Single Stop</h3>
-                <div class="bg-green-100 rounded-lg p-3">
-                  <p class="font-bold text-gray-800">${stops[0].customerName}</p>
-                  <p class="text-sm text-gray-600">${stops[0].address}</p>
-                  <p class="text-sm text-gray-600">Phone: ${stops[0].customerPhone}</p>
-                </div>
-              `;
-            } else {
-              alert('Could not geocode address: ' + status);
+              document.getElementById('directions').innerHTML = `<h3 class="font-bold text-gray-800 mb-3">Single Stop</h3><div class="bg-green-100 rounded-lg p-3"><p class="font-bold text-gray-800">${stops[0].customerName}</p><p class="text-sm text-gray-600">${stops[0].address}</p><p class="text-sm text-gray-600">Phone: ${stops[0].customerPhone}</p></div>`;
             }
           });
           return;
         }
-
-        // Create waypoints for Directions API (for multiple stops)
-        // Include ALL stops as waypoints so Google can optimize the entire route
-        const waypoints = stops.map(stop => ({
-          location: stop.address,
-          stopover: true
-        }));
-
-        console.log('Total stops to optimize:', stops.length);
-        console.log('Waypoints:', waypoints);
-
-        // Use current location as origin
-        // Google will optimize all waypoints and return best order
         const directionsService = new google.maps.DirectionsService();
-        const directionsRenderer = new google.maps.DirectionsRenderer({
-          map: map,
-          suppressMarkers: false
-        });
-
-        const request = {
-          origin: currentLocation, // Start from driver's current location
-          destination: currentLocation, // Return to starting point (or use last stop)
-          waypoints: waypoints,
-          optimizeWaypoints: true, // Google optimizes the order!
+        const directionsRenderer = new google.maps.DirectionsRenderer({ map, suppressMarkers: false });
+        directionsService.route({
+          origin: currentLocation,
+          destination: currentLocation,
+          waypoints: stops.map(stop => ({ location: stop.address, stopover: true })),
+          optimizeWaypoints: true,
           travelMode: google.maps.TravelMode.DRIVING
-        };
-
-        console.log('Sending directions request with optimization...');
-
-        directionsService.route(request, async function(result, status) {
-          console.log('Directions result:', status);
-          
+        }, async function(result, status) {
           if (status === 'OK') {
             directionsRenderer.setDirections(result);
-            
-            // Get the optimized order from Google
             const optimizedOrder = result.routes[0].waypoint_order;
-            console.log('Google optimized order:', optimizedOrder);
-            console.log('Original order:', stops.map((s, i) => `${i}: ${s.customerName}`));
-            console.log('Optimized order:', optimizedOrder.map(i => `${i}: ${stops[i].customerName}`));
-            
-            // Display route summary
             const route = result.routes[0];
-            let totalDistance = 0;
-            let totalDuration = 0;
-            
-            route.legs.forEach(leg => {
-              totalDistance += leg.distance.value;
-              totalDuration += leg.duration.value;
-            });
-
-            document.getElementById('totalDistance').textContent = 
-              (totalDistance / 1000).toFixed(2) + ' km';
-            document.getElementById('totalDuration').textContent = 
-              Math.round(totalDuration / 60) + ' minutes';
-
-            // Display turn-by-turn directions with optimized order
+            let totalDistance = 0, totalDuration = 0;
+            route.legs.forEach(leg => { totalDistance += leg.distance.value; totalDuration += leg.duration.value; });
+            document.getElementById('totalDistance').textContent = (totalDistance / 1000).toFixed(2) + ' km';
+            document.getElementById('totalDuration').textContent = Math.round(totalDuration / 60) + ' minutes';
             displayDirections(result, stops, optimizedOrder);
-            
-            // Auto-sort pickup requests list to match route order
             await sortPickupRequestsByRoute(stops, optimizedOrder);
           } else {
-            alert('Could not create route: ' + status + '\n\nThis might be because:\n- Addresses are not specific enough\n- Addresses are not in the same region\n- Google Maps API issue\n\nCheck console for details.');
-            console.error('Directions request failed:', status);
-            console.error('Request was:', request);
+            alert('Could not create route: ' + status);
           }
         });
-
       } catch (error) {
-        console.error('Error creating route:', error);
         alert('Error creating route: ' + error.message);
       }
-    };
+    }
 
-    // DISPLAY DIRECTIONS
     function displayDirections(result, stops, optimizedOrder) {
       const directionsDiv = document.getElementById('directions');
-      
-      // Show optimization message
-      let headerHTML = '<h3 class="font-bold text-gray-800 mb-3">🚀 Optimized Route</h3>';
-      if (optimizedOrder && optimizedOrder.length > 0) {
-        headerHTML += '<p class="text-sm text-green-600 mb-3">✓ Google Maps optimized your stops for fastest delivery!</p>';
-      }
-      directionsDiv.innerHTML = headerHTML;
-
+      directionsDiv.innerHTML = '<h3 class="font-bold text-gray-800 mb-3">🚀 Optimized Route</h3>' +
+        (optimizedOrder?.length > 0 ? '<p class="text-sm text-green-600 mb-3">✓ Google Maps optimized your stops for fastest delivery!</p>' : '');
       const route = result.routes[0];
-      let stopNumber = 1;
-
-      // Create ordered stops list based on optimization
       const orderedStops = optimizedOrder ? optimizedOrder.map(i => stops[i]) : stops;
-
+      let stopNumber = 1;
       route.legs.forEach((leg, index) => {
-        // Skip first leg (from current location to first stop)
+        const stopDiv = document.createElement('div');
+        stopDiv.className = 'mb-4 pb-4 border-b border-gray-300';
+        const stopHeader = document.createElement('div');
         if (index === 0) {
-          const stopDiv = document.createElement('div');
-          stopDiv.className = 'mb-4 pb-4 border-b border-gray-300';
-          
-          const stopHeader = document.createElement('div');
           stopHeader.className = 'bg-blue-100 rounded-lg p-3 mb-2';
-          stopHeader.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-bold text-gray-800">📍 Start: Your Current Location</p>
-                <p class="text-sm text-gray-600">to Stop 1: ${orderedStops[0] ? orderedStops[0].customerName : 'First Stop'}</p>
-              </div>
-              <div class="text-right text-sm text-gray-600">
-                <p>${leg.distance.text}</p>
-                <p>${leg.duration.text}</p>
-              </div>
-            </div>
-          `;
+          stopHeader.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-gray-800">📍 Start: Your Current Location</p><p class="text-sm text-gray-600">to Stop 1: ${orderedStops[0]?.customerName || 'First Stop'}</p></div><div class="text-right text-sm text-gray-600"><p>${leg.distance.text}</p><p>${leg.duration.text}</p></div></div>`;
           stopDiv.appendChild(stopHeader);
           directionsDiv.appendChild(stopDiv);
           return;
         }
-
-        // Regular stops
         const actualStopIndex = index - 1;
         if (actualStopIndex >= orderedStops.length) return;
-
-        const stopDiv = document.createElement('div');
-        stopDiv.className = 'mb-4 pb-4 border-b border-gray-300';
-        
-        const stopHeader = document.createElement('div');
         stopHeader.className = 'bg-green-100 rounded-lg p-3 mb-2';
-        stopHeader.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="font-bold text-gray-800">Stop ${stopNumber}: ${orderedStops[actualStopIndex].customerName}</p>
-              <p class="text-sm text-gray-600">${orderedStops[actualStopIndex].address}</p>
-              <p class="text-sm text-gray-600">Phone: ${orderedStops[actualStopIndex].customerPhone}</p>
-            </div>
-            <div class="text-right text-sm text-gray-600">
-              <p>${leg.distance.text}</p>
-              <p>${leg.duration.text}</p>
-            </div>
-          </div>
-        `;
+        stopHeader.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-gray-800">Stop ${stopNumber}: ${orderedStops[actualStopIndex].customerName}</p><p class="text-sm text-gray-600">${orderedStops[actualStopIndex].address}</p><p class="text-sm text-gray-600">Phone: ${orderedStops[actualStopIndex].customerPhone}</p></div><div class="text-right text-sm text-gray-600"><p>${leg.distance.text}</p><p>${leg.duration.text}</p></div></div>`;
         stopDiv.appendChild(stopHeader);
-
-        // Turn-by-turn steps
         const stepsDiv = document.createElement('div');
         stepsDiv.className = 'ml-4 space-y-1';
-        
         leg.steps.forEach((step, stepIndex) => {
           const stepDiv = document.createElement('div');
           stepDiv.className = 'text-sm text-gray-700';
           stepDiv.innerHTML = `${stepIndex + 1}. ${step.instructions} (${step.distance.text})`;
           stepsDiv.appendChild(stepDiv);
         });
-        
         stopDiv.appendChild(stepsDiv);
         directionsDiv.appendChild(stopDiv);
         stopNumber++;
       });
-
-      // Add "Open in Google Maps" button with optimized order
       const openMapsBtn = document.createElement('button');
       openMapsBtn.className = 'w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg mt-4';
       openMapsBtn.textContent = '🗺️ Open Optimized Route in Google Maps';
       openMapsBtn.onclick = function() {
-        // Build Google Maps URL with optimized order
         const waypointsStr = orderedStops.map(s => encodeURIComponent(s.address)).join('|');
-        // Use "dir" endpoint which supports waypoint optimization
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(orderedStops[orderedStops.length - 1].address)}&waypoints=${waypointsStr}&travelmode=driving`;
-        window.open(url, '_blank');
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(orderedStops[orderedStops.length - 1].address)}&waypoints=${waypointsStr}&travelmode=driving`, '_blank');
       };
       directionsDiv.appendChild(openMapsBtn);
     }
 
-    // SHOW MANUAL PICKUP FORM
     window.showManualPickupForm = function(date, remainingCapacity) {
       document.getElementById('manualPickupDate').value = date;
       document.getElementById('manualPickupCapacity').value = remainingCapacity;
@@ -2037,32 +1211,19 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
       document.getElementById('manualPickupModal').classList.remove('hidden');
     };
 
-    // HIDE MANUAL PICKUP FORM
     window.hideManualPickupForm = function() {
       document.getElementById('manualPickupModal').classList.add('hidden');
       document.getElementById('manualPickupForm').reset();
     };
 
-    // SAVE MANUAL PICKUP
     document.getElementById('manualPickupForm')?.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
       const date = document.getElementById('manualPickupDate').value;
       const remainingCapacity = parseInt(document.getElementById('manualPickupCapacity').value);
       const boxes = parseInt(document.getElementById('manualCustomerBoxes').value);
-
-      console.log('=== MANUAL PICKUP DEBUG ===');
-      console.log('Date from hidden field:', date);
-      console.log('Date type:', typeof date);
-
-      // Validate capacity
-      if (boxes > remainingCapacity) {
-        alert(`Only ${remainingCapacity} boxes available on this date. Please reduce the number of boxes or choose a different date.`);
-        return;
-      }
-
+      if (boxes > remainingCapacity) { alert(`Only ${remainingCapacity} boxes available on this date.`); return; }
       const customerData = {
-        customerId: 'manual-' + Date.now(), // Manual entry doesn't have user ID
+        customerId: 'manual-' + Date.now(),
         customerName: document.getElementById('manualCustomerName').value.trim() || 'Unknown',
         customerEmail: document.getElementById('manualCustomerEmail').value.trim() || 'Unknown',
         customerPhone: document.getElementById('manualCustomerPhone').value,
@@ -2070,429 +1231,233 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
         driverId: window.currentUser.driverId,
         driverName: window.currentUser.name,
         pickupDate: date,
-        boxes: boxes,
-        status: 'confirmed', // Phone-in customers are auto-confirmed
+        boxes,
+        status: 'confirmed',
         createdAt: new Date().toISOString(),
-        manualEntry: true // Flag to identify phone-in customers
+        manualEntry: true
       };
-
-      console.log('Saving pickup with date:', customerData.pickupDate);
-      console.log('Full customer data:', customerData);
-
       try {
         await window.firestoreAddDoc(window.firestoreCollection(window.firestoreDb, 'pickupRequests'), customerData);
-        
+        // Save to driver customer list if email provided
+        if (customerData.customerEmail !== 'Unknown') {
+          await saveCustomerToDriverList(customerData, window.currentUser.driverId);
+        }
         alert('✅ Phone-in customer added successfully!');
-        
-        // Hide modal and reset form
         window.hideManualPickupForm();
-        
-        // Clear cached pickups to force fresh reload
         window.currentPickups = [];
-        
-        // Refresh pickup requests and availability
         await loadPickupRequests();
         await loadDriverAvailability();
+        await loadDriverCustomers();
       } catch (error) {
-        console.error('Error adding manual pickup:', error);
         alert('Error adding pickup: ' + error.message);
       }
     });
 
-    // TOGGLE PASSWORD VISIBILITY
     window.togglePasswordVisibility = function(inputId, iconId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById(iconId);
-      
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.textContent = '🙈'; // Hide icon
-      } else {
-        input.type = 'password';
-        icon.textContent = '👁️'; // Show icon
-      }
+      if (input.type === 'password') { input.type = 'text'; icon.textContent = '🙈'; }
+      else { input.type = 'password'; icon.textContent = '👁️'; }
     };
 
-    // SHOW FORGOT PASSWORD FORM
     window.showForgotPassword = function(userType) {
       window.currentResetUserType = userType;
       window.showView('passwordReset');
     };
 
-    // SEND PASSWORD RESET EMAIL
     window.sendPasswordResetEmail = async function() {
       const email = document.getElementById('resetEmail').value.trim();
-      
-      if (!email) {
-        alert('Please enter your email address');
-        return;
-      }
-
+      if (!email) { alert('Please enter your email address'); return; }
       try {
-        // Check if user exists
         const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
         const q = window.firestoreQuery(usersRef, window.firestoreWhere('email', '==', email));
         const querySnapshot = await window.firestoreGetDocs(q);
-        
-        if (querySnapshot.empty) {
-          alert('No account found with this email address.');
-          return;
-        }
-
-        // Generate reset token
+        if (querySnapshot.empty) { alert('No account found with this email address.'); return; }
         const resetToken = 'reset-' + Math.random().toString(36).substr(2, 16) + Date.now();
-        
-        // Update user with reset token
-        let userId = null;
         let userName = null;
         querySnapshot.forEach(async (doc) => {
-          userId = doc.id;
           userName = doc.data().name;
-          window.firestoreUpdateDoc(
-            window.firestoreDoc(window.firestoreDb, 'users', doc.id),
-            { resetToken: resetToken }
-          );
+          window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', doc.id), { resetToken });
         });
-
-        // Send reset email
         const resetLink = `${window.location.origin}/app.html?reset=${resetToken}`;
-        
-        await emailjs.send(
-          'service_itfrzub',
-          'template_verify',
-          {
-            to_email: email,
-            user_name: userName,
-            subject: 'Reset your D2D Pickup password',
-            message: 'We received a request to reset your password. Click the link below to create a new password:',
-            link: resetLink
-          }
-        );
-
+        await emailjs.send('service_itfrzub', 'template_verify', {
+          to_email: email, user_name: userName,
+          subject: 'Reset your D2D Pickup password',
+          message: 'We received a request to reset your password. Click the link below to create a new password:',
+          link: resetLink
+        });
         alert('✅ Password reset email sent!\n\nCheck your email for the reset link.');
         document.getElementById('resetEmail').value = '';
         window.showView('home');
       } catch (error) {
-        console.error('Error sending reset email:', error);
         alert('Error sending reset email. Please try again or contact support.');
       }
     };
 
-    // CHECK FOR PASSWORD RESET TOKEN
     async function checkPasswordReset() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const resetToken = urlParams.get('reset');
-      
+      const resetToken = new URLSearchParams(window.location.search).get('reset');
       if (resetToken) {
         try {
-          // Find user with this reset token
           const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
           const q = window.firestoreQuery(usersRef, window.firestoreWhere('resetToken', '==', resetToken));
           const querySnapshot = await window.firestoreGetDocs(q);
-          
           if (querySnapshot.empty) {
-            alert('❌ Invalid or expired reset link\n\nThis link is invalid or has already been used.\n\nPlease request a new password reset.');
+            alert('❌ Invalid or expired reset link\n\nPlease request a new password reset.');
             window.history.replaceState({}, document.title, '/app.html');
             window.showView('home');
             return;
           }
-          
-          // Store reset token and user ID for later use
-          querySnapshot.forEach((doc) => {
-            window.currentResetToken = resetToken;
-            window.currentResetUserId = doc.id;
-          });
-          
-          // Show new password form
+          querySnapshot.forEach((doc) => { window.currentResetToken = resetToken; window.currentResetUserId = doc.id; });
           window.showView('newPasswordForm');
           window.history.replaceState({}, document.title, '/app.html');
         } catch (error) {
-          console.error('Error checking reset token:', error);
           alert('Error processing reset link. Please try again.');
         }
       }
     }
 
-    // UPDATE PASSWORD
     window.updatePassword = async function() {
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
-      
-      if (!newPassword || !confirmPassword) {
-        alert('Please fill in both password fields');
-        return;
-      }
-      
-      if (newPassword.length < 6) {
-        alert('Password must be at least 6 characters');
-        return;
-      }
-      
-      if (newPassword !== confirmPassword) {
-        alert('Passwords do not match!');
-        return;
-      }
-
+      if (!newPassword || !confirmPassword) { alert('Please fill in both password fields'); return; }
+      if (newPassword.length < 6) { alert('Password must be at least 6 characters'); return; }
+      if (newPassword !== confirmPassword) { alert('Passwords do not match!'); return; }
       try {
-        // Update password in database
-        await window.firestoreUpdateDoc(
-          window.firestoreDoc(window.firestoreDb, 'users', window.currentResetUserId),
-          { 
-            password: newPassword,
-            resetToken: null // Remove reset token
-          }
-        );
-
+        await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', window.currentResetUserId), { password: newPassword, resetToken: null });
         alert('✅ Password updated successfully!\n\nYou can now login with your new password.');
-        
-        // Clear form
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
-        
-        // Go to home
         window.showView('home');
       } catch (error) {
-        console.error('Error updating password:', error);
         alert('Error updating password. Please try again or contact support.');
       }
     };
 
-    // LOGOUT
     window.logout = function() {
       window.currentUser = null;
       window.showView('home');
-      // Clear login forms
-      document.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => {
-        input.value = '';
-      });
+      document.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => { input.value = ''; });
     };
 
-    // CHECK FOR EMAIL VERIFICATION TOKEN
     async function checkEmailVerification() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const verifyToken = urlParams.get('verify');
-      
-      console.log('=== EMAIL VERIFICATION CHECK ===');
-      console.log('URL params:', window.location.search);
-      console.log('Verify token:', verifyToken);
-      
+      const verifyToken = new URLSearchParams(window.location.search).get('verify');
       if (verifyToken) {
         try {
-          console.log('Looking for user with token:', verifyToken);
-          
-          // Find user with this verification token
           const usersRef = window.firestoreCollection(window.firestoreDb, 'users');
           const q = window.firestoreQuery(usersRef, window.firestoreWhere('verificationToken', '==', verifyToken));
           const querySnapshot = await window.firestoreGetDocs(q);
-          
-          console.log('Query complete. Empty?', querySnapshot.empty);
-          console.log('Number of results:', querySnapshot.size);
-          
           if (querySnapshot.empty) {
-            alert('❌ Invalid verification link\n\nThis link is invalid or has already been used.\n\nIf you need help, contact support at jpiccampbell@yahoo.com');
-            window.history.replaceState({}, document.title, '/app.html'); // Remove ?verify= from URL
+            alert('❌ Invalid verification link\n\nContact support at jpiccampbell@yahoo.com');
+            window.history.replaceState({}, document.title, '/app.html');
             return;
           }
-          
-          // Update user to verified
-          let updated = false;
           for (const doc of querySnapshot.docs) {
-            console.log('Found user:', doc.id);
-            console.log('Current data:', doc.data());
-            
-            await window.firestoreUpdateDoc(
-              window.firestoreDoc(window.firestoreDb, 'users', doc.id),
-              { 
-                emailVerified: true,
-                verificationToken: null // Remove token after use
-              }
-            );
-            
-            console.log('User updated to verified!');
-            
+            await window.firestoreUpdateDoc(window.firestoreDoc(window.firestoreDb, 'users', doc.id), { emailVerified: true, verificationToken: null });
             const userData = doc.data();
             alert(`✅ EMAIL VERIFIED!\n\nYour account (${userData.email}) has been verified!\n\nYou can now login as a ${userData.accountType}.`);
-            window.history.replaceState({}, document.title, '/app.html'); // Remove ?verify= from URL
-            updated = true;
-          }
-          
-          if (!updated) {
-            console.error('No user was updated!');
+            window.history.replaceState({}, document.title, '/app.html');
           }
         } catch (error) {
-          console.error('Error verifying email:', error);
-          console.error('Error details:', error.message);
           alert('Error verifying email: ' + error.message + '\n\nPlease contact support.');
         }
-      } else {
-        console.log('No verification token in URL');
       }
     }
 
-    // Initialize on page load
     window.addEventListener('DOMContentLoaded', async () => {
       window.showView('home');
-      console.log('App initialized with Firebase!');
-      
-      // Check for email verification
       await checkEmailVerification();
-      
-      // Check for password reset
       await checkPasswordReset();
     });
   </script>
 </head>
 <body class="bg-gray-100">
-  
-  <!-- Background -->
+
   <div class="fixed inset-0 z-0">
     <div class="absolute inset-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-    <div class="absolute inset-0" style="
-      background-image: 
-        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px),
-        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px);
-    "></div>
+    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px), repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.03) 35px, rgba(255,255,255,.03) 70px);"></div>
     <div class="absolute inset-0 bg-gradient-to-br from-blue-500/30 via-indigo-500/20 to-purple-500/30"></div>
   </div>
 
-  <!-- Content wrapper with higher z-index -->
   <div class="relative z-10">
 
   <!-- HOME VIEW -->
   <div id="home" class="view min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    
-    <!-- Decorative shipping elements -->
     <div class="absolute inset-0 opacity-10">
-      <!-- Top left truck -->
       <div class="absolute top-10 left-10 text-white text-8xl transform -rotate-12">🚚</div>
-      <!-- Top right boxes -->
       <div class="absolute top-20 right-20 text-white text-7xl transform rotate-12">📦</div>
-      <!-- Bottom left container -->
       <div class="absolute bottom-20 left-20 text-white text-9xl">🚢</div>
-      <!-- Bottom right plane -->
       <div class="absolute bottom-32 right-10 text-white text-6xl transform rotate-45">✈️</div>
-      <!-- Center boxes scattered -->
       <div class="absolute top-1/2 left-1/4 text-white text-5xl transform -rotate-6">📦</div>
       <div class="absolute top-1/3 right-1/3 text-white text-6xl transform rotate-12">📦</div>
     </div>
-    
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
       <div class="text-center mb-8">
         <div class="text-6xl mb-4">📦</div>
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Door to Door</h1>
         <h2 class="text-xl text-indigo-600 font-semibold">Pickup and Delivery</h2>
       </div>
-
       <div class="space-y-4">
-        <button onclick="goToView('customerLogin')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">
-          👤 Customer Login
-        </button>
-
-        <button onclick="goToView('driverLogin')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">
-          🚚 Driver Login
-        </button>
-
-        <button onclick="goToView('createAccount')" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">
-          ➕ Create an Account
-        </button>
+        <button onclick="goToView('customerLogin')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">👤 Customer Login</button>
+        <button onclick="goToView('driverLogin')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">🚚 Driver Login</button>
+        <button onclick="goToView('createAccount')" class="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-200">➕ Create an Account</button>
       </div>
     </div>
   </div>
 
   <!-- CUSTOMER LOGIN -->
   <div id="customerLogin" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    
-    <!-- Decorative shipping elements -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-10 left-10 text-white text-8xl transform -rotate-12">🚚</div>
       <div class="absolute top-20 right-20 text-white text-7xl transform rotate-12">📦</div>
       <div class="absolute bottom-20 left-20 text-white text-9xl">🚢</div>
       <div class="absolute bottom-32 right-10 text-white text-6xl transform rotate-45">✈️</div>
-      <div class="absolute top-1/2 left-1/4 text-white text-5xl transform -rotate-6">📦</div>
-      <div class="absolute top-1/3 right-1/3 text-white text-6xl transform rotate-12">📦</div>
     </div>
-    
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Customer Login</h2>
-      
       <div class="space-y-4">
         <div>
           <label class="block text-gray-700 font-medium mb-2">Email</label>
           <input type="email" id="customerLoginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Enter your email">
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Password</label>
           <div class="relative">
             <input type="password" id="customerLoginPassword" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Enter your password">
-            <button type="button" onclick="togglePasswordVisibility('customerLoginPassword', 'customerEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
-              <span id="customerEyeIcon">👁️</span>
-            </button>
+            <button type="button" onclick="togglePasswordVisibility('customerLoginPassword', 'customerEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"><span id="customerEyeIcon">👁️</span></button>
           </div>
         </div>
-
-        <button onclick="handleLogin('customer')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-          Login
-        </button>
-
-        <div class="text-center">
-          <button type="button" onclick="showForgotPassword('customer')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-            Forgot Password?
-          </button>
-        </div>
-
-        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
-          Back
-        </button>
+        <button onclick="handleLogin('customer')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">Login</button>
+        <div class="text-center"><button type="button" onclick="showForgotPassword('customer')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Forgot Password?</button></div>
+        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">Back</button>
       </div>
     </div>
   </div>
 
   <!-- DRIVER LOGIN -->
   <div id="driverLogin" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    
-    <!-- Decorative shipping elements -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-10 left-10 text-white text-8xl transform -rotate-12">🚚</div>
       <div class="absolute top-20 right-20 text-white text-7xl transform rotate-12">📦</div>
       <div class="absolute bottom-20 left-20 text-white text-9xl">🚢</div>
       <div class="absolute bottom-32 right-10 text-white text-6xl transform rotate-45">✈️</div>
-      <div class="absolute top-1/2 left-1/4 text-white text-5xl transform -rotate-6">📦</div>
-      <div class="absolute top-1/3 right-1/3 text-white text-6xl transform rotate-12">📦</div>
     </div>
-    
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Driver Login</h2>
-      
       <div class="space-y-4">
         <div>
           <label class="block text-gray-700 font-medium mb-2">Email</label>
           <input type="email" id="driverLoginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Enter your email">
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Password</label>
           <div class="relative">
             <input type="password" id="driverLoginPassword" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Enter your password">
-            <button type="button" onclick="togglePasswordVisibility('driverLoginPassword', 'driverEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
-              <span id="driverEyeIcon">👁️</span>
-            </button>
+            <button type="button" onclick="togglePasswordVisibility('driverLoginPassword', 'driverEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"><span id="driverEyeIcon">👁️</span></button>
           </div>
         </div>
-
-        <button onclick="handleLogin('driver')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-          Login
-        </button>
-
-        <div class="text-center">
-          <button type="button" onclick="showForgotPassword('driver')" class="text-green-600 hover:text-green-800 text-sm font-medium">
-            Forgot Password?
-          </button>
-        </div>
-
-        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
-          Back
-        </button>
+        <button onclick="handleLogin('driver')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">Login</button>
+        <div class="text-center"><button type="button" onclick="showForgotPassword('driver')" class="text-green-600 hover:text-green-800 text-sm font-medium">Forgot Password?</button></div>
+        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">Back</button>
       </div>
     </div>
   </div>
@@ -2501,164 +1466,104 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
   <div id="passwordReset" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Reset Password</h2>
-      
-      <div id="resetEmailForm" class="space-y-4">
+      <div class="space-y-4">
         <p class="text-gray-600 text-center mb-4">Enter your email address and we'll send you a link to reset your password.</p>
-        
         <div>
           <label class="block text-gray-700 font-medium mb-2">Email Address</label>
           <input type="email" id="resetEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="your.email@example.com">
         </div>
-
-        <button onclick="sendPasswordResetEmail()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-          Send Reset Link
-        </button>
-
-        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
-          Back
-        </button>
+        <button onclick="sendPasswordResetEmail()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">Send Reset Link</button>
+        <button onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">Back</button>
       </div>
     </div>
   </div>
 
-  <!-- NEW PASSWORD FORM (shown after clicking reset link) -->
+  <!-- NEW PASSWORD FORM -->
   <div id="newPasswordForm" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative z-10">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create New Password</h2>
-      
       <div class="space-y-4">
         <div>
           <label class="block text-gray-700 font-medium mb-2">New Password</label>
           <div class="relative">
             <input type="password" id="newPassword" required minlength="6" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="At least 6 characters">
-            <button type="button" onclick="togglePasswordVisibility('newPassword', 'newPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
-              <span id="newPasswordEyeIcon">👁️</span>
-            </button>
+            <button type="button" onclick="togglePasswordVisibility('newPassword', 'newPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"><span id="newPasswordEyeIcon">👁️</span></button>
           </div>
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Confirm New Password</label>
           <div class="relative">
             <input type="password" id="confirmPassword" required minlength="6" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Re-enter password">
-            <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
-              <span id="confirmPasswordEyeIcon">👁️</span>
-            </button>
+            <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"><span id="confirmPasswordEyeIcon">👁️</span></button>
           </div>
         </div>
-
-        <button onclick="updatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-          Update Password
-        </button>
+        <button onclick="updatePassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">Update Password</button>
       </div>
     </div>
   </div>
 
   <!-- CREATE ACCOUNT -->
   <div id="createAccount" class="view hidden min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-    
-    <!-- Decorative shipping elements -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-10 left-10 text-white text-8xl transform -rotate-12">🚚</div>
       <div class="absolute top-20 right-20 text-white text-7xl transform rotate-12">📦</div>
       <div class="absolute bottom-20 left-20 text-white text-9xl">🚢</div>
       <div class="absolute bottom-32 right-10 text-white text-6xl transform rotate-45">✈️</div>
-      <div class="absolute top-1/2 left-1/4 text-white text-5xl transform -rotate-6">📦</div>
-      <div class="absolute top-1/3 right-1/3 text-white text-6xl transform rotate-12">📦</div>
     </div>
-    
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl my-8 relative z-10">
       <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create an Account</h2>
-      
       <form id="createAccountForm" onsubmit="handleCreateAccount(event)" class="space-y-5">
         <div class="bg-gray-50 p-4 rounded-lg">
           <label class="block text-gray-700 font-semibold mb-3">I am a:</label>
           <div class="flex gap-4">
-            <label class="flex items-center cursor-pointer">
-              <input type="radio" name="accountType" value="customer" checked class="w-4 h-4" onchange="toggleCompanyNameField()">
-              <span class="ml-2 text-gray-700 font-medium">Customer</span>
-            </label>
-            <label class="flex items-center cursor-pointer">
-              <input type="radio" name="accountType" value="driver" class="w-4 h-4" onchange="toggleCompanyNameField()">
-              <span class="ml-2 text-gray-700 font-medium">Driver</span>
-            </label>
+            <label class="flex items-center cursor-pointer"><input type="radio" name="accountType" value="customer" checked class="w-4 h-4" onchange="toggleCompanyNameField()"><span class="ml-2 text-gray-700 font-medium">Customer</span></label>
+            <label class="flex items-center cursor-pointer"><input type="radio" name="accountType" value="driver" class="w-4 h-4" onchange="toggleCompanyNameField()"><span class="ml-2 text-gray-700 font-medium">Driver</span></label>
           </div>
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Full Name *</label>
           <input type="text" id="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="John Doe">
         </div>
-
-        <!-- Company Name field - only for drivers -->
         <div id="companyNameField" style="display: none;">
           <label class="block text-gray-700 font-medium mb-2">Company Name (Optional)</label>
           <input type="text" id="companyName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g., Door to Door Express">
         </div>
-
         <div class="space-y-4">
           <h3 class="text-gray-700 font-semibold text-lg">Full Address</h3>
-          
           <div>
             <label class="block text-gray-700 font-medium mb-2">Street Address *</label>
             <input type="text" id="street" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="123 Main Street">
           </div>
-
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">City *</label>
-              <input type="text" id="city" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="City">
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">State *</label>
-              <input type="text" id="state" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="State">
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">ZIP Code *</label>
-              <input type="text" id="zipCode" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="12345">
-            </div>
+            <div><label class="block text-gray-700 font-medium mb-2">City *</label><input type="text" id="city" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="City"></div>
+            <div><label class="block text-gray-700 font-medium mb-2">State *</label><input type="text" id="state" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="State"></div>
+            <div><label class="block text-gray-700 font-medium mb-2">ZIP Code *</label><input type="text" id="zipCode" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="12345"></div>
           </div>
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Phone Number *</label>
           <input type="tel" id="phone" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="(555) 123-4567">
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Email Address *</label>
           <input type="email" id="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="your.email@example.com">
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Create Password *</label>
           <div class="relative">
             <input type="password" id="password" required minlength="6" class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="At least 6 characters">
-            <button type="button" onclick="togglePasswordVisibility('password', 'createEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800">
-              <span id="createEyeIcon">👁️</span>
-            </button>
+            <button type="button" onclick="togglePasswordVisibility('password', 'createEyeIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800"><span id="createEyeIcon">👁️</span></button>
           </div>
         </div>
-
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <label class="flex items-start cursor-pointer">
             <input type="checkbox" id="acceptTerms" required class="mt-1 w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-            <span class="ml-3 text-sm text-gray-700">
-              I agree to the <a href="/terms-of-service.html" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Terms of Service</a> and <a href="/privacy-policy.html" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Privacy Policy</a> *
-            </span>
+            <span class="ml-3 text-sm text-gray-700">I agree to the <a href="/terms-of-service.html" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Terms of Service</a> and <a href="/privacy-policy.html" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Privacy Policy</a> *</span>
           </label>
         </div>
-
         <div class="space-y-3 pt-4">
-          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-            Create Account
-          </button>
-
-          <button type="button" onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">
-            Back to Home
-          </button>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">Create Account</button>
+          <button type="button" onclick="goToView('home')" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200">Back to Home</button>
         </div>
       </form>
     </div>
@@ -2674,15 +1579,10 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
             <p class="text-gray-600">Welcome, <span id="driverName"></span>!</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="showEditProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-              Edit Profile
-            </button>
-            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-              Logout
-            </button>
+            <button onclick="showEditProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">Edit Profile</button>
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">Logout</button>
           </div>
         </div>
-        
         <div class="mt-4 bg-green-50 border-2 border-green-500 rounded-lg p-4">
           <p class="text-sm text-gray-600 mb-1">Your Unique Driver ID:</p>
           <p id="driverIdDisplay" class="text-2xl font-bold text-green-700"></p>
@@ -2695,18 +1595,13 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
           <h2 class="text-xl font-bold text-gray-800 mb-4">Set Availability (Next 30 Days)</h2>
           <div id="availabilityDates" class="space-y-2 max-h-96 overflow-y-auto"></div>
         </div>
-
         <div class="bg-white rounded-2xl shadow-xl p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-gray-800">Pickup Requests (<span id="requestCount">0</span>)</h2>
             <div id="bulkDeleteControls" class="hidden flex gap-2">
               <span class="text-sm text-gray-600"><span id="selectedCount">0</span> selected</span>
-              <button onclick="deleteSelectedPickups()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-semibold">
-                Delete Selected
-              </button>
-              <button onclick="clearSelection()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded text-sm">
-                Clear
-              </button>
+              <button onclick="deleteSelectedPickups()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-semibold">Delete Selected</button>
+              <button onclick="clearSelection()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded text-sm">Clear</button>
             </div>
           </div>
           <div id="pickupRequests" class="space-y-4 max-h-96 overflow-y-auto"></div>
@@ -2716,24 +1611,13 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
       <!-- Route Planning Section -->
       <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Route Planning</h2>
-        
         <div class="mb-4">
           <label class="block text-gray-700 font-medium mb-2">Select Date for Route:</label>
           <div class="flex gap-2">
-            <input 
-              type="date" 
-              id="routeDate" 
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-            />
-            <button 
-              onclick="createRoute()"
-              class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition"
-            >
-              Create Route
-            </button>
+            <input type="date" id="routeDate" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" />
+            <button onclick="createRoute()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition">Create Route</button>
           </div>
         </div>
-
         <div id="routeInfo" class="mb-4 hidden">
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 class="font-bold text-gray-800 mb-2">Route Summary</h3>
@@ -2742,98 +1626,57 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
             <p class="text-sm text-gray-600"><strong>Estimated Time:</strong> <span id="totalDuration">0</span></p>
           </div>
         </div>
-
         <div id="mapContainer" class="hidden">
           <div id="map" class="w-full h-96 rounded-lg border-2 border-gray-300 mb-4"></div>
           <div id="directions" class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto"></div>
         </div>
-
-        <div id="noPickups" class="hidden text-center py-8 text-gray-500">
-          No confirmed pickups for this date
-        </div>
+        <div id="noPickups" class="hidden text-center py-8 text-gray-500">No confirmed pickups for this date</div>
       </div>
 
+      <!-- Your Information -->
       <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Your Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <p class="text-gray-600">Email</p>
-            <p id="driverEmail" class="font-medium text-gray-800"></p>
-          </div>
-          <div>
-            <p class="text-gray-600">Phone</p>
-            <p id="driverPhone" class="font-medium text-gray-800"></p>
-          </div>
-          <div>
-            <p class="text-gray-600">Company Name</p>
-            <p id="driverCompanyName" class="font-medium text-gray-800"></p>
-          </div>
-          <div class="md:col-span-2">
-            <p class="text-gray-600">Address</p>
-            <p id="driverAddress" class="font-medium text-gray-800"></p>
-          </div>
+          <div><p class="text-gray-600">Email</p><p id="driverEmail" class="font-medium text-gray-800"></p></div>
+          <div><p class="text-gray-600">Phone</p><p id="driverPhone" class="font-medium text-gray-800"></p></div>
+          <div><p class="text-gray-600">Company Name</p><p id="driverCompanyName" class="font-medium text-gray-800"></p></div>
+          <div class="md:col-span-2"><p class="text-gray-600">Address</p><p id="driverAddress" class="font-medium text-gray-800"></p></div>
         </div>
       </div>
 
-      <!-- Edit Profile Modal (hidden by default) -->
+      <!-- *** NEW: MY CUSTOMERS SECTION *** -->
+      <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-gray-800">My Customers (<span id="customerCount">0</span>)</h2>
+          <p class="text-xs text-gray-500">Sorted A–Z by last name</p>
+        </div>
+        <p class="text-sm text-gray-500 mb-4">All customers from past and current bookings. Deleting a pickup does not remove them from this list.</p>
+        <div id="driverCustomerList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+      </div>
+
+      <!-- Edit Profile Modal -->
       <div id="editProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
           <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h2>
-          
           <form id="editProfileForm" class="space-y-4">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Name</label>
-              <input type="text" id="editName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Email</label>
-              <input type="email" id="editEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Phone</label>
-              <input type="tel" id="editPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Company Name (Optional)</label>
-              <input type="text" id="editCompanyName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., Door to Door Express">
-            </div>
-
+            <div><label class="block text-gray-700 font-medium mb-2">Name</label><input type="text" id="editName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Email</label><input type="email" id="editEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Phone</label><input type="tel" id="editPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Company Name (Optional)</label><input type="text" id="editCompanyName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., Door to Door Express"></div>
             <div>
               <label class="block text-gray-700 font-medium mb-2">Delivery Pricing & Notes (Optional)</label>
-              <textarea id="editPricingNotes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., $5 per box&#10;Free delivery over 10 boxes&#10;Same-day service available&#10;Fragile items: $2 extra"></textarea>
-              <p class="text-xs text-gray-500 mt-1">This will be visible to your customers when they view your driver card</p>
+              <textarea id="editPricingNotes" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="e.g., $5 per box&#10;Free delivery over 10 boxes"></textarea>
+              <p class="text-xs text-gray-500 mt-1">Visible to your customers on your driver card</p>
             </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Street Address</label>
-              <input type="text" id="editStreet" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-            </div>
-
+            <div><label class="block text-gray-700 font-medium mb-2">Street Address</label><input type="text" id="editStreet" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
             <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">City</label>
-                <input type="text" id="editCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-              </div>
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">State</label>
-                <input type="text" id="editState" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-              </div>
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">ZIP</label>
-                <input type="text" id="editZipCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required>
-              </div>
+              <div><label class="block text-gray-700 font-medium mb-2">City</label><input type="text" id="editCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
+              <div><label class="block text-gray-700 font-medium mb-2">State</label><input type="text" id="editState" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
+              <div><label class="block text-gray-700 font-medium mb-2">ZIP</label><input type="text" id="editZipCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" required></div>
             </div>
-
             <div class="flex gap-3 pt-4">
-              <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg">
-                Save Changes
-              </button>
-              <button type="button" onclick="hideEditProfile()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">
-                Cancel
-              </button>
+              <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg">Save Changes</button>
+              <button type="button" onclick="hideEditProfile()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
             </div>
           </form>
         </div>
@@ -2851,16 +1694,11 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
             <p class="text-gray-600">Welcome, <span id="customerName"></span>!</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="showCustomerEditProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-              Edit Profile
-            </button>
-            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-              Logout
-            </button>
+            <button onclick="showCustomerEditProfile()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">Edit Profile</button>
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">Logout</button>
           </div>
         </div>
       </div>
-
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-2xl shadow-xl p-6">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Your Information</h2>
@@ -2871,38 +1709,22 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
             <p><strong>Address:</strong> <span id="customerInfoAddress"></span></p>
           </div>
         </div>
-
         <div class="bg-white rounded-2xl shadow-xl p-6">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Add New Driver</h2>
-          
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Enter Driver Code</label>
             <div class="flex gap-2">
-              <input 
-                type="text" 
-                id="driverCode"
-                placeholder="e.g., DRV-ABC123"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-              />
-              <button 
-                onclick="searchDriver()"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
-              >
-                Add Driver
-              </button>
+              <input type="text" id="driverCode" placeholder="e.g., DRV-ABC123" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+              <button onclick="searchDriver()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">Add Driver</button>
             </div>
             <div id="driverStatus"></div>
           </div>
         </div>
       </div>
-
-      <!-- My Drivers Section -->
       <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">My Drivers</h2>
         <div id="savedDriversList" class="space-y-4"></div>
       </div>
-
-      <!-- My Pickups Section -->
       <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">My Scheduled Pickups</h2>
         <div id="customerPickups" class="space-y-4"></div>
@@ -2912,50 +1734,19 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
       <div id="editCustomerProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
           <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h2>
-          
           <form id="editCustomerProfileForm" class="space-y-4">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Name</label>
-              <input type="text" id="editCustomerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Email</label>
-              <input type="email" id="editCustomerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Phone</label>
-              <input type="tel" id="editCustomerPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2">Street Address</label>
-              <input type="text" id="editCustomerStreet" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-            </div>
-
+            <div><label class="block text-gray-700 font-medium mb-2">Name</label><input type="text" id="editCustomerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Email</label><input type="email" id="editCustomerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Phone</label><input type="tel" id="editCustomerPhone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
+            <div><label class="block text-gray-700 font-medium mb-2">Street Address</label><input type="text" id="editCustomerStreet" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
             <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">City</label>
-                <input type="text" id="editCustomerCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-              </div>
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">State</label>
-                <input type="text" id="editCustomerState" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-              </div>
-              <div>
-                <label class="block text-gray-700 font-medium mb-2">ZIP</label>
-                <input type="text" id="editCustomerZipCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
-              </div>
+              <div><label class="block text-gray-700 font-medium mb-2">City</label><input type="text" id="editCustomerCity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
+              <div><label class="block text-gray-700 font-medium mb-2">State</label><input type="text" id="editCustomerState" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
+              <div><label class="block text-gray-700 font-medium mb-2">ZIP</label><input type="text" id="editCustomerZipCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required></div>
             </div>
-
             <div class="flex gap-3 pt-4">
-              <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg">
-                Save Changes
-              </button>
-              <button type="button" onclick="hideCustomerEditProfile()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">
-                Cancel
-              </button>
+              <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg">Save Changes</button>
+              <button type="button" onclick="hideCustomerEditProfile()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
             </div>
           </form>
         </div>
@@ -2963,124 +1754,105 @@ alert(`✅ Pickup scheduled!\n\nDate: ${new Date(date + 'T00:00:00').toLocaleDat
     </div>
   </div>
 
-  </div> <!-- Close content wrapper -->
+  </div> <!-- close relative z-10 -->
 
   <!-- Customer Booking Modal -->
   <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Schedule Pickup</h2>
-      
       <form id="bookingForm" class="space-y-4">
         <input type="hidden" id="bookingDriverId" />
         <input type="hidden" id="bookingDate" />
         <input type="hidden" id="bookingCapacity" />
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Number of Boxes *</label>
           <input type="number" id="bookingBoxes" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="5">
           <p class="text-xs text-gray-500 mt-1">Available space: <span id="bookingCapacityDisplay"></span> boxes</p>
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Notes for Driver (Optional)</label>
           <textarea id="bookingNotes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g., Fragile items, Gate code: 1234, Call when arriving, etc."></textarea>
           <p class="text-xs text-gray-500 mt-1">Let your driver know about special instructions</p>
         </div>
-
         <div class="flex gap-3 pt-4">
-          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg">
-            Book Pickup
-          </button>
-          <button type="button" onclick="hideBookingModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">
-            Cancel
-          </button>
+          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg">Book Pickup</button>
+          <button type="button" onclick="hideBookingModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Manual Pickup Entry Modal (must be outside all view containers) -->
+  <!-- Manual Pickup Entry Modal -->
   <div id="manualPickupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-screen overflow-y-auto">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Add Phone-In Customer</h2>
-      
       <form id="manualPickupForm" class="space-y-4">
         <input type="hidden" id="manualPickupDate" />
         <input type="hidden" id="manualPickupCapacity" />
-
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Customer Name (Optional)</label>
-          <input type="text" id="manualCustomerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided">
-        </div>
-
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Phone Number *</label>
-          <input type="tel" id="manualCustomerPhone" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="(555) 123-4567">
-        </div>
-
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Email Address (Optional)</label>
-          <input type="email" id="manualCustomerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided">
-        </div>
-
-        <div>
-          <label class="block text-gray-700 font-medium mb-2">Street Address *</label>
-          <input type="text" id="manualCustomerStreet" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="123 Main Street">
-        </div>
-
+        <div><label class="block text-gray-700 font-medium mb-2">Customer Name (Optional)</label><input type="text" id="manualCustomerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided"></div>
+        <div><label class="block text-gray-700 font-medium mb-2">Phone Number *</label><input type="tel" id="manualCustomerPhone" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="(555) 123-4567"></div>
+        <div><label class="block text-gray-700 font-medium mb-2">Email Address (Optional)</label><input type="email" id="manualCustomerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="Unknown if not provided"></div>
+        <div><label class="block text-gray-700 font-medium mb-2">Street Address *</label><input type="text" id="manualCustomerStreet" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="123 Main Street"></div>
         <div class="grid grid-cols-3 gap-4">
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">City *</label>
-            <input type="text" id="manualCustomerCity" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="City">
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">State *</label>
-            <input type="text" id="manualCustomerState" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="State">
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-2">ZIP *</label>
-            <input type="text" id="manualCustomerZip" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="12345">
-          </div>
+          <div><label class="block text-gray-700 font-medium mb-2">City *</label><input type="text" id="manualCustomerCity" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="City"></div>
+          <div><label class="block text-gray-700 font-medium mb-2">State *</label><input type="text" id="manualCustomerState" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="State"></div>
+          <div><label class="block text-gray-700 font-medium mb-2">ZIP *</label><input type="text" id="manualCustomerZip" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="12345"></div>
         </div>
-
         <div>
           <label class="block text-gray-700 font-medium mb-2">Number of Boxes *</label>
           <input type="number" id="manualCustomerBoxes" required min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="5">
           <p class="text-xs text-gray-500 mt-1">Available capacity: <span id="manualCapacityDisplay"></span> boxes</p>
         </div>
-
         <div class="flex gap-3 pt-4">
-          <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg">
-            Add Pickup
-          </button>
-          <button type="button" onclick="hideManualPickupForm()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">
-            Cancel
-          </button>
+          <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg">Add Pickup</button>
+          <button type="button" onclick="hideManualPickupForm()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Footer with legal links -->
+  <!-- *** NEW: Email Customer Modal *** -->
+  <div id="emailCustomerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Send Email</h2>
+      <p class="text-gray-600 mb-4 text-sm">To: <span id="emailCustomerName" class="font-semibold text-gray-800"></span></p>
+      <input type="hidden" id="emailCustomerTo" />
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Subject *</label>
+          <input type="text" id="emailCustomerSubject"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            placeholder="e.g., Pickup delay notice, Route update, etc." />
+        </div>
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">Message *</label>
+          <textarea id="emailCustomerMessage" rows="6"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            placeholder="Type your message to the customer here..."></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="sendEmailToCustomer()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg">✉️ Send Email</button>
+          <button onclick="hideEmailCustomerModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 rounded-lg">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
   <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 text-center z-50">
     <div class="text-sm text-gray-600">
-      © 2026 D2D Pickup. All rights reserved. | 
-      <a href="/privacy-policy.html" target="_blank" class="text-indigo-600 hover:text-indigo-800">Privacy Policy</a> | 
+      © 2026 D2D Pickup. All rights reserved. |
+      <a href="/privacy-policy.html" target="_blank" class="text-indigo-600 hover:text-indigo-800">Privacy Policy</a> |
       <a href="/terms-of-service.html" target="_blank" class="text-indigo-600 hover:text-indigo-800">Terms of Service</a>
     </div>
   </footer>
 
-  <!-- Register Service Worker for PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('PWA: Service Worker registered successfully:', registration.scope);
-          })
-          .catch((error) => {
-            console.log('PWA: Service Worker registration failed:', error);
-          });
+          .then(r => console.log('PWA: Service Worker registered:', r.scope))
+          .catch(e => console.log('PWA: Service Worker failed:', e));
       });
     }
   </script>
